@@ -1,0 +1,67 @@
+version: phase1-modeling-v1
+random_seed: 20260802
+
+forecasting:
+  kpis: [interest_coverage_ttm, free_cash_flow_margin_ttm, total_debt_to_assets]
+  horizons: [1, 4]
+  minimum_history: 16
+  validation_origin_policy: last_company_observation_before_fold_validation
+  candidate_models:
+    - random_walk
+    - random_walk_drift
+    - local_level
+    - local_linear_trend
+    - regression_dlm
+  regression_exog: [DFF, BAA10Y, UNRATE]
+  state_space_maxiter: 100
+  interval_level: 0.95
+  selection_metric: RMSE
+  secondary_metrics: [MAE, interval_coverage, sector_stability, convergence_rate]
+  fallback_model: random_walk
+  classifier_feature_model: local_level
+  classifier_feature_model_selection: prespecified_before_classifier_validation
+
+classification:
+  target: deterioration_label
+  candidate_models: [logistic_regression, gradient_boosted_trees]
+  feature_increments:
+    current_fundamentals:
+      - interest_coverage_ttm
+      - free_cash_flow_margin_ttm
+      - total_debt_to_assets
+      - operating_margin_ttm
+      - current_ratio
+      - cash_to_assets
+      - sector
+      - industry
+    historical_and_peer:
+      include_registry_features: true
+      exclude_macro_and_interactions: true
+    forecast_interest_coverage:
+      base: historical_and_peer
+      add: [forecast_interest_coverage_4q, forecast_interest_coverage_change_4q, forecast_interest_coverage_uncertainty_4q]
+    all_forecasts:
+      base: forecast_interest_coverage
+      add_all_kpi_forecasts: true
+    macro_and_interactions:
+      include_registry_features: true
+      add_all_kpi_forecasts: true
+  calibration_quarters: 4
+  maximum_alert_rate: 0.25
+  logistic_c: 0.5
+  xgboost:
+    n_estimators: 250
+    max_depth: 3
+    learning_rate: 0.04
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 8
+    reg_lambda: 2.0
+  primary_metric: PR_AUC
+  minimum_recall_reported: true
+  calibration_bins: 10
+
+selection:
+  hierarchy: [PR_AUC, Brier_score, sector_stability, temporal_stability, interpretability, simplicity]
+  simplicity_order: [logistic_regression, gradient_boosted_trees]
+  evaluate_locked_holdout_once_after_freeze: true

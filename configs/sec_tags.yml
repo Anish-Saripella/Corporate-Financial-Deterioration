@@ -5,8 +5,15 @@ concepts:
     unit: USD
     preferred_tags:
       - RevenueFromContractWithCustomerExcludingAssessedTax
+      - RevenueFromContractWithCustomerIncludingAssessedTax
       - Revenues
       - SalesRevenueNet
+      - SalesRevenueGoodsNet
+      - SalesRevenueServicesNet
+      - RegulatedAndUnregulatedOperatingRevenue
+      - RegulatedOperatingRevenue
+      - ElectricUtilityRevenue
+      - ElectricDomesticRegulatedRevenue
   operating_income:
     statement: income
     period_type: duration
@@ -19,8 +26,17 @@ concepts:
     unit: USD
     preferred_tags:
       - InterestExpenseNonOperating
+      - InterestExpenseNonoperating
       - InterestAndDebtExpense
       - InterestExpense
+      - InterestExpenseDebt
+      - InterestExpenseLongTermDebt
+      - InterestExpenseDebtExcludingAmortization
+      - FinancingInterestExpense
+      - InterestIncomeExpenseNonoperatingNet
+      - InterestIncomeExpenseNet
+      - InterestExpenseOtherLongTermDebt
+      - InterestCostsIncurred
   net_income:
     statement: income
     period_type: duration
@@ -33,6 +49,7 @@ concepts:
     unit: USD
     preferred_tags:
       - NetCashProvidedByUsedInOperatingActivities
+      - NetCashProvidedByUsedInOperatingActivitiesContinuingOperations
   capital_expenditures:
     statement: cash_flow
     period_type: duration
@@ -40,7 +57,15 @@ concepts:
     sign_policy: convert_cash_outflow_to_positive
     preferred_tags:
       - PaymentsToAcquirePropertyPlantAndEquipment
+      - PaymentsToAcquireProductiveAssets
+      - PaymentsToAcquireOtherProductiveAssets
+      - PaymentsToAcquireOtherPropertyPlantAndEquipment
       - PaymentsForProceedsFromPropertyPlantAndEquipment
+      - PaymentsForCapitalImprovements
+      - PaymentsForConstructionInProcess
+      - PaymentsToAcquireProjects
+      - PaymentsToAcquireWaterAndWasteWaterSystems
+      - PaymentsToAcquireOilAndGasPropertyAndEquipment
   cash_and_equivalents:
     statement: balance_sheet
     period_type: instant
@@ -55,12 +80,25 @@ concepts:
     preferred_tags:
       - ShortTermBorrowings
       - LongTermDebtCurrent
+      - LongTermDebtAndCapitalLeaseObligationsCurrent
   long_term_debt:
     statement: balance_sheet
     period_type: instant
     unit: USD
     preferred_tags:
       - LongTermDebtNoncurrent
+      - LongTermDebt
+      - LongTermDebtAndCapitalLeaseObligations
+      - UnsecuredLongTermDebt
+  total_debt:
+    statement: balance_sheet
+    period_type: instant
+    unit: USD
+    preferred_tags:
+      - LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities
+      - LongTermDebtAndFinanceLeaseObligations
+      - LongTermDebtAndCapitalLeaseObligations
+      - DebtAndCapitalLeaseObligations
       - LongTermDebt
   total_assets:
     statement: balance_sheet
@@ -89,7 +127,7 @@ derived_kpis:
     formula: (operating_cash_flow_ttm - capital_expenditures_ttm) / revenue_ttm
     economic_dimension: liquidity_generation
   total_debt_to_assets:
-    formula: (short_term_debt + long_term_debt) / total_assets
+    formula: total_debt / total_assets
     economic_dimension: capital_structure
   net_debt_to_ebitda:
     status: secondary_diagnostic_only

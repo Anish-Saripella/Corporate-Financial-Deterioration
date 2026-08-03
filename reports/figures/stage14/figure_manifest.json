@@ -1,0 +1,15 @@
+{
+  "theme_version": "publication-theme-v1",
+  "title_prefix": "Corporate Financial Deterioration",
+  "figures": [
+    {
+      "slug": "01-classifier-feature-increment-pr-auc",
+      "title": "Classifier value by feature increment",
+      "description": "Out-of-fold PR-AUC isolates the incremental value of forecasts and macro context.",
+      "files": [
+        "reports/figures/stage14/01-classifier-feature-increment-pr-auc.png",
+        "reports/figures/stage14/01-classifier-feature-increment-pr-auc.svg"
+      ]
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -33,19 +34,22 @@ class FredClient:
         self,
         *,
         series_id: str,
-        realtime_start: str = "1776-07-04",
-        realtime_end: str = "9999-12-31",
+        realtime_start: str = "2012-01-01",
+        realtime_end: str | None = None,
         output_type: int = 1,
+        observation_start: str = "2012-01-01",
     ) -> tuple[bytes, dict[str, Any]]:
         """Retrieve observations while retaining their real-time availability periods."""
 
+        effective_realtime_end = realtime_end or date.today().isoformat()
         parameters: dict[str, Any] = {
             "series_id": series_id,
             "api_key": self._api_key,
             "file_type": "json",
             "realtime_start": realtime_start,
-            "realtime_end": realtime_end,
+            "realtime_end": effective_realtime_end,
             "output_type": output_type,
+            "observation_start": observation_start,
         }
         response = self._client.get(FRED_OBSERVATIONS_URL, params=parameters)
         response.raise_for_status()
@@ -63,15 +67,17 @@ class FredClient:
         series_id: str,
         destination: Path,
         manifest_directory: Path,
-        realtime_start: str = "1776-07-04",
-        realtime_end: str = "9999-12-31",
+        realtime_start: str = "2012-01-01",
+        realtime_end: str | None = None,
         output_type: int = 1,
+        observation_start: str = "2012-01-01",
     ) -> AcquisitionManifest:
         content, parameters = self.observations(
             series_id=series_id,
             realtime_start=realtime_start,
             realtime_end=realtime_end,
             output_type=output_type,
+            observation_start=observation_start,
         )
         return write_download_with_manifest(
             content=content,

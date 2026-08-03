@@ -1,0 +1,106 @@
+version: sic-sector-v1
+mappings:
+  - sector: Utilities
+    industry: Electric Utilities
+    sic_codes: [4911]
+  - sector: Utilities
+    industry: Gas Utilities
+    sic_codes: [4922, 4923, 4924]
+  - sector: Utilities
+    industry: Multi-Utilities
+    sic_codes: [4931, 4932]
+  - sector: Utilities
+    industry: Water Utilities
+    sic_codes: [4941]
+  - sector: Consumer Discretionary
+    industry: Homebuilding and Construction
+    sic_ranges: [[1521, 1542]]
+  - sector: Consumer Discretionary
+    industry: Apparel and Footwear
+    sic_ranges: [[2300, 2399], [3021, 3021], [3131, 3151]]
+  - sector: Consumer Discretionary
+    industry: Household Durables
+    sic_ranges: [[2510, 2599], [3630, 3652]]
+  - sector: Consumer Discretionary
+    industry: Automobiles and Components
+    sic_codes: [3711, 3713, 3714, 3715, 3751]
+  - sector: Consumer Discretionary
+    industry: Leisure Products
+    sic_codes: [3931, 3942, 3944, 3949]
+  - sector: Consumer Discretionary
+    industry: Automotive Retail
+    sic_ranges: [[5511, 5599]]
+  - sector: Consumer Discretionary
+    industry: Apparel Retail
+    sic_ranges: [[5600, 5699]]
+  - sector: Consumer Discretionary
+    industry: Home and Electronics Retail
+    sic_codes: [5211, 5231, 5251, 5261, 5712, 5713, 5714, 5719, 5722, 5731, 5734, 5735, 5736]
+  - sector: Consumer Discretionary
+    industry: Specialty and Department Retail
+    sic_codes: [5311, 5331, 5399, 5940, 5941, 5944, 5945, 5947, 5948, 5949, 5961, 5999]
+  - sector: Consumer Discretionary
+    industry: Restaurants
+    sic_codes: [5812, 5813]
+  - sector: Consumer Discretionary
+    industry: Hotels and Lodging
+    sic_codes: [7011]
+  - sector: Consumer Discretionary
+    industry: Entertainment and Recreation
+    sic_ranges: [[7812, 7841], [7911, 7999]]
+
+exclusion_name_patterns:
+  - " ACQUISITION CORP"
+  - " ACQUISITION CO"
+  - " BLANK CHECK"
+  - " ETF"
+  - " FUND"
+  - " TRUST"
+
+entity_overrides:
+  exclude:
+    - cik: "0000029534"
+      ticker: DG
+      reason: Defensive discount retailer classified as Consumer Staples for project purposes.
+    - cik: "0001531152"
+      ticker: BJ
+      reason: Membership grocery and staples retailer outside the cyclical project sector.
+    - cik: "0001376986"
+      ticker: TVE
+      reason: Government instrumentality with exchange-traded debt rather than public common equity.
+    - cik: "0001061219"
+      ticker: EPD
+      reason: Non-regulated midstream master limited partnership.
+    - cik: "0001276187"
+      ticker: ET
+      reason: Non-regulated midstream energy partnership.
+    - cik: "0001692787"
+      ticker: KNTK
+      reason: Non-regulated midstream infrastructure company.
+    - cik: "0001504461"
+      ticker: NGL
+      reason: Non-regulated midstream energy partnership.
+    - cik: "0001522727"
+      ticker: USAC
+      reason: Non-regulated compression infrastructure partnership.
+    - cik: "0001423902"
+      ticker: WES
+      reason: Non-regulated midstream partnership.
+    - cik: "0000107263"
+      ticker: WMB
+      reason: Non-regulated interstate pipeline company.
+    - cik: "0001039684"
+      ticker: OKE
+      reason: Non-regulated midstream infrastructure company.
+    - cik: "0000003570"
+      ticker: LNG
+      reason: LNG infrastructure rather than a regulated gas distributor.
+    - cik: "0001383650"
+      ticker: CQP
+      reason: LNG infrastructure partnership rather than a regulated gas distributor.
+    - cik: "0001506307"
+      ticker: KMI
+      reason: Non-regulated midstream and pipeline infrastructure company.
+    - cik: "0001603145"
+      ticker: XIFR
+      reason: LNG infrastructure rather than a regulated electric utility.

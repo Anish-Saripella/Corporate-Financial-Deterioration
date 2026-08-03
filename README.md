@@ -35,13 +35,10 @@ make dagster
 `make bootstrap` installs `uv` inside `.venv`, creates a locked environment, and installs the
 development tools. It does not modify system Python.
 
-## First reproducible workflow
+## Reproduce the completed Phase 1 product
 
 ```bash
-.venv/bin/cfd validate-config
-.venv/bin/cfd show-scope
-.venv/bin/dagster asset materialize -m cfd.orchestration.definitions \
-  --select phase1_configuration,local_duckdb
+make reproduce-phase1
 ```
 
 Network ingestion is deliberately separate from local validation. Add real credentials to
@@ -68,5 +65,46 @@ schemas, transformations, tests, and small fixtures are committed. See
 
 ## Project status
 
-Infrastructure and data contracts are established. The next milestone is a filing-aware SEC
-proof of concept for 6–10 companies, followed by the rules-based 60-company universe audit.
+The full chronological execution plan and completion gates are documented in
+[`docs/phase1_implementation_plan.md`](docs/phase1_implementation_plan.md).
+The accepted point-in-time, KPI-definition, company-certification, and replacement assumptions are
+recorded in
+[`docs/decisions/0003-point-in-time-panel-and-modeling-eligibility.md`](docs/decisions/0003-point-in-time-panel-and-modeling-eligibility.md).
+
+Stages 0–18 are complete. The certified universe contains 30 Consumer Discretionary and 30
+Utilities companies; all 60 pass the three-KPI coverage, continuity, lineage, and leakage gates.
+See
+[`docs/stages_0_7_execution.md`](docs/stages_0_7_execution.md) for evidence and limitations.
+Stages 8–12, including the 14 audited replacements, frozen deterioration label, publication-grade
+EDA, feature registry, and temporal split design, are documented in
+[`docs/stages_8_12_execution.md`](docs/stages_8_12_execution.md).
+Forecasting, classifier experiments, champion selection, locked-holdout evaluation, and the
+production asset graph are documented in
+[`docs/stages_13_16_execution.md`](docs/stages_13_16_execution.md) and
+[`docs/model_card.md`](docs/model_card.md).
+The reconciled four-page Tableau delivery and Phase 1 publication audit are documented in
+[`docs/stages_17_18_execution.md`](docs/stages_17_18_execution.md). Open the workbook source at
+[`dashboards/tableau/Corporate_Financial_Deterioration.twb`](dashboards/tableau/Corporate_Financial_Deterioration.twb)
+after running `make dashboard` to refresh its relative CSV connections. The self-contained packaged
+workbook for Tableau Public is
+[`dashboards/tableau/Corporate_Financial_Deterioration.twbx`](dashboards/tableau/Corporate_Financial_Deterioration.twbx).
+Run `.venv/bin/cfd verify-source-manifests` to recheck every cached acquisition against its
+recorded checksum.
+After freezing or deliberately refreshing the universe, run `.venv/bin/cfd materialize-final-store`
+to retain company financial data locally for only the selected 60. Downstream modeling uses this
+local Parquet/DuckDB store and makes no SEC API calls.
+Reproduce Stages 8–12 from the certified local store with:
+
+```bash
+.venv/bin/cfd run-stages-8-12
+```
+
+Reproduce the completed modeling pipeline with:
+
+```bash
+.venv/bin/cfd run-stages-13-16
+```
+
+Phase 1 is the minimum credible product. Future work may add macroeconomic regime probabilities,
+prospective scoring beyond evaluated labels, more sectors, and delisted-company histories under a
+new version rather than changing the frozen Phase 1 experiment.

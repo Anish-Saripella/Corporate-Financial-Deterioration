@@ -30,3 +30,5 @@ dashboards/tableau/exports/*
 *.duckdb
 *.duckdb.wal
 *.hyper
+
+reports/figures/stage10/05-leverage-and-interest-coverage-risk-map.svg

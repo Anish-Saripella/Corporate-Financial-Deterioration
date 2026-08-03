@@ -1,0 +1,17 @@
+version: publication-theme-v1
+title_prefix: Corporate Financial Deterioration
+font_family: DejaVu Sans
+figure_size: [10, 6]
+dpi: 300
+background: "#FFFFFF"
+text_color: "#17202A"
+grid_color: "#D9E2E8"
+sector_colors:
+  Consumer Discretionary: "#D97706"
+  Utilities: "#2563EB"
+neutral_colors:
+  primary: "#334155"
+  secondary: "#94A3B8"
+  positive: "#138A72"
+  warning: "#C2410C"
+export_formats: [png, svg]

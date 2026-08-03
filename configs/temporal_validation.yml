@@ -1,0 +1,23 @@
+version: expanding-window-v1
+time_column: decision_at
+minimum_training_quarters: 24
+validation_window_quarters: 4
+step_quarters: 4
+label_horizon_quarters: 4
+embargo_quarters: 4
+candidate_final_holdout_starts: [2023-01-01, 2024-01-01]
+holdout_selection_rule: latest_boundary_with_interpretable_events_in_both_sectors
+model_development_access_to_final_holdout: false
+forecast_metrics: [MAE, RMSE, interval_coverage, sector_stability]
+classification_metric_hierarchy:
+  primary: PR_AUC
+  secondary: [recall, precision, top_decile_lift, Brier_score, calibration_error]
+  operational: [alert_volume, false_alert_rate]
+reporting_slices: [overall, sector, economic_regime, deterioration_episode]
+model_selection_order:
+  - out_of_time_primary_metric
+  - calibration
+  - sector_stability
+  - temporal_stability
+  - interpretability
+  - simplicity

@@ -1,0 +1,45 @@
+proof_of_concept:
+  companies:
+    - cik: 354950
+      ticker: HD
+      sector: Consumer Discretionary
+      rationale: Calendar-year specialty retailer with extensive filing history.
+    - cik: 63908
+      ticker: MCD
+      sector: Consumer Discretionary
+      rationale: Restaurant issuer with franchise economics.
+    - cik: 37996
+      ticker: F
+      sector: Consumer Discretionary
+      rationale: Automobile manufacturer with complex debt reporting.
+    - cik: 1048286
+      ticker: MAR
+      sector: Consumer Discretionary
+      rationale: Lodging issuer with asset-light operations.
+    - cik: 320187
+      ticker: NKE
+      sector: Consumer Discretionary
+      rationale: Non-calendar fiscal year and branded apparel exposure.
+    - cik: 753308
+      ticker: NEE
+      sector: Utilities
+      rationale: Large electric utility and renewable generation mix.
+    - cik: 1326160
+      ticker: DUK
+      sector: Utilities
+      rationale: Regulated electric and gas utility.
+    - cik: 92122
+      ticker: SO
+      sector: Utilities
+      rationale: Regulated electric utility with long filing history.
+    - cik: 1410636
+      ticker: AWK
+      sector: Utilities
+      rationale: Water utility with a different capital profile.
+  sec_bulk_reconciliation_quarters:
+    - 2012q1
+    - 2020q2
+    - 2025q4
+  fred_validation_series:
+    revised: UNRATE
+    non_revised: DFF

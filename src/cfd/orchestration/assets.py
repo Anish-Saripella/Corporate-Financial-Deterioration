@@ -1,16 +1,34 @@
-"""Phase 1 asset graph scaffolding.
+"""Materializable local asset graph for the completed Phase 1 modeling pipeline."""
 
-Only the configuration and database foundation assets are immediately materializable. Network
-and modeling assets are declared as observable placeholders so the intended lineage is explicit
-without pretending unimplemented transformations already work.
-"""
-
+import json
+import time
+from pathlib import Path
 from typing import Any
 
+import pandas as pd
 from dagster import AssetExecutionContext, MaterializeResult, MetadataValue, asset
 
-from cfd.config import load_project_config
+from cfd.analysis.model_results import run_model_result_plots
+from cfd.config import load_project_config, repository_root
 from cfd.database import initialize_database
+from cfd.stage13 import run_stage_13
+from cfd.stage14 import run_stage_14
+from cfd.stage15 import run_stage_15
+from cfd.stage16 import finalize_stage_16
+from cfd.stage17 import run_stage_17
+from cfd.stage18 import run_stage_18
+
+
+def _table_metadata(path: Path, *, key: str = "decision_key") -> dict[str, Any]:
+    frame = pd.read_parquet(path)
+    metadata: dict[str, Any] = {
+        "path": MetadataValue.path(str(path)),
+        "rows": len(frame),
+        "columns": len(frame.columns),
+    }
+    if key in frame:
+        metadata["unique_keys"] = int(frame[key].nunique())
+    return metadata
 
 
 @asset(group_name="foundation", description="Validated, version-controlled Phase 1 scope.")
@@ -35,46 +53,83 @@ def local_duckdb(context: AssetExecutionContext) -> MaterializeResult[Any]:
 
 
 @asset(deps=[local_duckdb], group_name="source_data")
-def sec_company_universe() -> None:
-    """Candidate issuer metadata; implemented in the SEC proof-of-concept milestone."""
-
-    raise NotImplementedError("Run the documented SEC proof-of-concept milestone first")
-
-
-@asset(deps=[sec_company_universe], group_name="source_data")
-def sec_as_filed_fundamentals() -> None:
-    """As-filed, accession-aware quarterly financial facts."""
-
-    raise NotImplementedError("Financial statement bulk ingestion is the next milestone")
+def certified_local_source_cache() -> MaterializeResult[Any]:
+    root = repository_root()
+    files = list((root / "data" / "raw" / "sec" / "companyfacts").glob("CIK*.json"))
+    if len(files) != 60:
+        raise ValueError(f"Expected 60 cached Company Facts files, found {len(files)}")
+    return MaterializeResult(metadata={"cached_companyfacts": len(files), "network_calls": 0})
 
 
-@asset(deps=[local_duckdb], group_name="source_data")
-def alfred_macro_vintages() -> None:
-    """Point-in-time macro observations with real-time periods."""
-
-    raise NotImplementedError("ALFRED ingestion requires a configured free FRED_API_KEY")
-
-
-@asset(deps=[sec_as_filed_fundamentals], group_name="analytics")
-def normalized_company_quarters() -> None:
-    raise NotImplementedError("Requires source financial facts")
-
-
-@asset(deps=[normalized_company_quarters, alfred_macro_vintages], group_name="analytics")
-def point_in_time_feature_table() -> None:
-    raise NotImplementedError("Requires normalized financial and macro inputs")
+@asset(deps=[certified_local_source_cache], group_name="analytics")
+def certified_point_in_time_panel() -> MaterializeResult[Any]:
+    path = repository_root() / "data" / "processed" / "point_in_time_panel.parquet"
+    frame = pd.read_parquet(path)
+    if frame["decision_key"].duplicated().any():
+        raise ValueError("Certified panel contains duplicate decision keys")
+    if (frame["maximum_source_available_at"] > frame["decision_at"]).any():
+        raise ValueError("Certified panel contains future financial information")
+    return MaterializeResult(metadata=_table_metadata(path))
 
 
-@asset(deps=[point_in_time_feature_table], group_name="modeling")
-def kpi_forecasts() -> None:
-    raise NotImplementedError("Requires the leakage-safe feature table")
+@asset(deps=[certified_point_in_time_panel], group_name="analytics")
+def frozen_temporal_design() -> MaterializeResult[Any]:
+    path = repository_root() / "data" / "processed" / "temporal_split_assignments.parquet"
+    return MaterializeResult(metadata=_table_metadata(path))
 
 
-@asset(deps=[point_in_time_feature_table, kpi_forecasts], group_name="modeling")
-def deterioration_predictions() -> None:
-    raise NotImplementedError("Requires time-aware model training")
+@asset(deps=[frozen_temporal_design], group_name="modeling")
+def kpi_forecasts() -> MaterializeResult[Any]:
+    result = run_stage_13()
+    return MaterializeResult(metadata={"summary": MetadataValue.json(result)})
+
+
+@asset(deps=[kpi_forecasts], group_name="modeling")
+def deterioration_predictions() -> MaterializeResult[Any]:
+    stage14 = run_stage_14()
+    stage15 = run_stage_15()
+    return MaterializeResult(
+        metadata={
+            "stage14": MetadataValue.json(stage14),
+            "stage15": MetadataValue.json(stage15),
+        }
+    )
 
 
 @asset(deps=[deterioration_predictions], group_name="delivery")
-def tableau_exports() -> None:
-    raise NotImplementedError("Requires out-of-fold predictions and KPI forecasts")
+def publication_model_diagnostics() -> MaterializeResult[Any]:
+    result = run_model_result_plots()
+    return MaterializeResult(metadata={"figures": MetadataValue.json(result)})
+
+
+@asset(deps=[publication_model_diagnostics], group_name="governance")
+def production_model_pipeline() -> MaterializeResult[Any]:
+    root = repository_root()
+    reports = root / "reports" / "generated"
+
+    def load(name: str) -> dict[str, Any]:
+        payload = json.loads((reports / name).read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError(f"Expected a JSON object in {name}")
+        return payload
+
+    result = finalize_stage_16(
+        stage13=load("stage13_summary.json"),
+        stage14=load("stage14_summary.json"),
+        stage15=load("stage15_summary.json"),
+        plots=run_model_result_plots(),
+        started_at=time.monotonic(),
+    )
+    return MaterializeResult(metadata={"run_manifest": MetadataValue.json(result)})
+
+
+@asset(deps=[production_model_pipeline], group_name="delivery")
+def tableau_dashboard_exports() -> MaterializeResult[Any]:
+    result = run_stage_17()
+    return MaterializeResult(metadata={"summary": MetadataValue.json(result)})
+
+
+@asset(deps=[tableau_dashboard_exports], group_name="governance")
+def phase1_release_audit() -> MaterializeResult[Any]:
+    result = run_stage_18()
+    return MaterializeResult(metadata={"summary": MetadataValue.json(result)})

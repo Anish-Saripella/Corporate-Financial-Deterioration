@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 PYTHON ?= python3
 
-.PHONY: help bootstrap install lock test lint format typecheck defs-check check dagster config-check clean
+.PHONY: help bootstrap install lock test lint format typecheck defs-check check dagster config-check clean reproduce-phase1 dashboard release-audit
 
 help:
 	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z_-]+:.*## / {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -41,6 +41,17 @@ config-check: ## Validate project configuration and create required local direct
 
 dagster: ## Start the local Dagster UI
 	.venv/bin/dagster dev -m cfd.orchestration.definitions
+
+dashboard: ## Rebuild and reconcile the four Tableau delivery extracts
+	.venv/bin/python -m cfd.cli run-stages-17-18
+
+release-audit: ## Run the Phase 1 publication audit
+	.venv/bin/python -c "from cfd.stage18 import run_stage_18; print(run_stage_18())"
+
+reproduce-phase1: check ## Rebuild Phase 1 from the certified local public-data cache
+	.venv/bin/python -m cfd.cli run-stages-8-12
+	.venv/bin/python -m cfd.cli run-stages-13-16
+	.venv/bin/python -m cfd.cli run-stages-17-18
 
 clean: ## Remove generated caches (preserves source data)
 	find . -type d -name __pycache__ -prune -exec rm -r {} +

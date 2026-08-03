@@ -1,7 +1,7 @@
 label:
   name: debt_service_deterioration
-  version: 0.1.0-candidate
-  status: candidate_pending_training_period_event_audit
+  version: 1.0.0-frozen
+  status: frozen_after_development_period_event_audit
   horizon_fiscal_quarters: 4
   source_kpi: interest_coverage_ttm
   definition:
@@ -21,3 +21,8 @@ label:
     - Inspect prevalence by sector, size, fiscal year, and recession period.
     - Confirm the final holdout contains enough distinct episodes for evaluation.
     - Freeze thresholds before final model comparison.
+  audit_result:
+    development_period_end: 2022-12-31
+    final_holdout_start: 2023-01-01
+    threshold_selection_basis: prespecified_economic_plausibility_grid_not_model_performance
+    minimum_holdout_episodes_per_sector: 5

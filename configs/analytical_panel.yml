@@ -1,0 +1,66 @@
+version: point-in-time-panel-v1
+
+decision_time_policy:
+  financial_information_available_when: filed_at
+  amended_fact_available_when: amendment_filed_at
+  preserve_original_and_amended_accessions: true
+  retroactive_restatement_allowed: false
+  macro_join_date: actual_fiscal_period_end
+  macro_information_available_when: realtime_start
+  fiscal_quarter_label_used_as_calendar_join_key: false
+
+kpis:
+  interest_coverage:
+    formula: operating_income / positive_interest_expense
+    numerator_concept: operating_income
+    denominator_concept: interest_expense
+    negative_operating_income_is_valid: true
+    zero_or_negligible_denominator_action: set_missing_and_flag
+    minimum_absolute_interest_expense: 1000000
+  free_cash_flow_margin:
+    formula: (operating_cash_flow - capital_expenditures) / revenue
+    numerator_concepts: [operating_cash_flow, capital_expenditures]
+    denominator_concept: revenue
+    nonpositive_revenue_action: set_missing_and_flag
+  total_debt_to_assets:
+    formula: total_debt / total_assets
+    numerator_concepts: [total_debt]
+    total_debt_fallback: short_term_debt + long_term_debt
+    denominator_concept: total_assets
+    nonpositive_assets_action: set_missing_and_flag
+
+company_modeling_eligibility:
+  all_required_kpis_must_pass: true
+  minimum_observed_quarters_per_kpi: 24
+  minimum_consecutive_quarters_per_kpi: 16
+  minimum_coverage_per_kpi: 0.80
+  coverage_window_starts_at_first_valid_kpi_observation: true
+  ttm_warmup_quarters_excluded_from_coverage_denominator: true
+  unresolved_essential_mapping_allowed: false
+  duplicate_company_decision_keys_allowed: false
+  future_available_facts_allowed: false
+  future_macro_vintages_allowed: false
+  unexplained_nonfinite_values_allowed: false
+  material_lineage_breaks_allowed: false
+
+outlier_policy:
+  preserve_raw_values: true
+  create_edge_case_flags: true
+  fit_caps_on_training_fold_only: true
+  apply_caps_to_validation_and_test_from_training_fold: true
+
+replacement_policy:
+  enabled: true
+  trigger: failure_of_any_company_modeling_eligibility_rule
+  ordering: frozen_same_sector_reserve_order
+  outcome_or_model_performance_may_influence_replacement: false
+  replacement_must_pass_identical_rules: true
+  retain_target_count_per_sector: 30
+  insufficient_reserves_action: stop_and_expand_candidate_pool_transparently
+  require_versioned_audit_record: true
+
+label_and_holdout_policy:
+  audit_event_prevalence_on_development_period_only: true
+  freeze_thresholds_before_final_model_comparison: true
+  choose_holdout_without_optimizing_model_performance: true
+  require_interpretable_event_counts_by_sector: true

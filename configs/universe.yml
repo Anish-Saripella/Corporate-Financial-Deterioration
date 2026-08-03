@@ -1,5 +1,6 @@
 universe:
-  selection_as_of: 2025-12-31
+  selection_as_of: 2026-08-02
+  financial_history_cutoff: 2025-12-31
   population: currently_listed_us_operating_companies
   sectors:
     Consumer Discretionary:
@@ -23,3 +24,27 @@ universe:
     - Excluding delisted issuers creates survivorship bias and narrows all claims to the fixed research universe.
     - Exclusions must be generated from rules and stored with a machine-readable reason code.
     - Model performance must be reported separately for each sector.
+  sampling:
+    method: stratified_random_without_replacement
+    random_seed: 20260802
+    strata:
+      - sector
+      - broad_industry
+      - filing_based_size_tier
+    size_proxy: median_total_assets_development_period
+    size_tie_breaker: median_revenue_development_period
+    size_tiers: 3
+    reserve_order_required: true
+    outcome_aware_resampling_allowed: false
+    event_feasibility_expansion:
+      allowed: true
+      maximum_total_company_count: 80
+      method: frozen_reserve_order_only
+  pre_model_certification:
+    config: configs/analytical_panel.yml
+    all_three_kpis_required_per_company: true
+    company_replacement_allowed_for_data_quality_failure: true
+    replacement_order: frozen_same_sector_reserve_order
+    outcome_aware_replacement_allowed: false
+    model_performance_aware_replacement_allowed: false
+    insufficient_reserves_action: stop_and_expand_candidate_pool_transparently

@@ -9,9 +9,11 @@
 
 ## Deterioration classification
 
-- Expanding-window folds with at least 24 training quarters.
+- Three annual expanding-window folds with at least 24 training quarters.
 - Preprocessing, feature selection, and tuning fit inside each fold.
-- Final out-of-time holdout chosen after an event-count audit and frozen before comparison.
+- Labels whose four-quarter outcome window is not complete by a fold origin are embargoed.
+- The final out-of-time holdout begins 2023-01-01 and was frozen after a development-only event
+  audit, before model fitting or comparison.
 - Regularized logistic regression and constrained gradient boosting.
 - PR-AUC, recall, precision, top-decile lift, Brier score, calibration, and alert volume.
 - Performance reported by sector and time period.
@@ -31,3 +33,7 @@ decision dates. Row count will never be presented as the number of independent e
 
 These comparisons determine whether forecasting adds value; the advanced model is not assumed to
 win.
+
+The primary classifier selection metric is PR-AUC. Calibration, sector stability, temporal
+stability, interpretability, and simplicity are evaluated in that order after primary predictive
+performance. The locked holdout is unavailable during model development.

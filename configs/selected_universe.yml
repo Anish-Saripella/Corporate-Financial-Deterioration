@@ -1,0 +1,401 @@
+version: selected-universe-v2-certified
+selection_as_of: '2026-08-02'
+financial_history_cutoff: '2025-12-31'
+certification_config: point-in-time-panel-v1
+random_seed: 20260802
+manifest_sha256: a3d4289eea96ff9921f99a200d148493e04110d3698769edb1f3dc82ba6ad5c6
+selected:
+- cik: 0000039911
+  ticker: GAP
+  sector: Consumer Discretionary
+  industry: Apparel Retail
+  size_tier: large
+  random_rank: 1
+- cik: 0000103379
+  ticker: VFC
+  sector: Consumer Discretionary
+  industry: Apparel and Footwear
+  size_tier: large
+  random_rank: 2
+- cik: 0001060822
+  ticker: CRI
+  sector: Consumer Discretionary
+  industry: Apparel and Footwear
+  size_tier: small
+  random_rank: 3
+- cik: 0000908255
+  ticker: BWA
+  sector: Consumer Discretionary
+  industry: Automobiles and Components
+  size_tier: large
+  random_rank: 4
+- cik: '0001034670'
+  ticker: ALV
+  sector: Consumer Discretionary
+  industry: Automobiles and Components
+  size_tier: medium
+  random_rank: 5
+- cik: '0001206264'
+  ticker: SGI
+  sector: Consumer Discretionary
+  industry: Household Durables
+  size_tier: medium
+  random_rank: 6
+  replaces_cik: '0000067347'
+  replacement_source: frozen_reserve
+- cik: '0001057060'
+  ticker: HZO
+  sector: Consumer Discretionary
+  industry: Automotive Retail
+  size_tier: small
+  random_rank: 7
+- cik: 0001411579
+  ticker: AMC
+  sector: Consumer Discretionary
+  industry: Entertainment and Recreation
+  size_tier: large
+  random_rank: 8
+- cik: 0001158449
+  ticker: AAP
+  sector: Consumer Discretionary
+  industry: Automotive Retail
+  size_tier: large
+  random_rank: 9
+  replaces_cik: 0001385280
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: '0000062234'
+  ticker: MCS
+  sector: Consumer Discretionary
+  industry: Entertainment and Recreation
+  size_tier: small
+  random_rank: 10
+- cik: 0000354950
+  ticker: HD
+  sector: Consumer Discretionary
+  industry: Home and Electronics Retail
+  size_tier: large
+  random_rank: 11
+- cik: 0001326380
+  ticker: GME
+  sector: Consumer Discretionary
+  industry: Home and Electronics Retail
+  size_tier: medium
+  random_rank: 12
+- cik: 0001507079
+  ticker: FND
+  sector: Consumer Discretionary
+  industry: Home and Electronics Retail
+  size_tier: small
+  random_rank: 13
+- cik: '0000110471'
+  ticker: WWW
+  sector: Consumer Discretionary
+  industry: Apparel and Footwear
+  size_tier: small
+  random_rank: 14
+  replaces_cik: 0001361658
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: 0001018840
+  ticker: ANF
+  sector: Consumer Discretionary
+  industry: Apparel Retail
+  size_tier: medium
+  random_rank: 15
+  replaces_cik: '0001616000'
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: '0001046311'
+  ticker: CHH
+  sector: Consumer Discretionary
+  industry: Hotels and Lodging
+  size_tier: small
+  random_rank: 16
+- cik: '0000106640'
+  ticker: WHR
+  sector: Consumer Discretionary
+  industry: Household Durables
+  size_tier: large
+  random_rank: 17
+- cik: 0000091142
+  ticker: AOS
+  sector: Consumer Discretionary
+  industry: Household Durables
+  size_tier: medium
+  random_rank: 18
+- cik: 0000048287
+  ticker: HNI
+  sector: Consumer Discretionary
+  industry: Household Durables
+  size_tier: small
+  random_rank: 19
+- cik: 0000837465
+  ticker: CALY
+  sector: Consumer Discretionary
+  industry: Leisure Products
+  size_tier: small
+  random_rank: 20
+- cik: 0000063908
+  ticker: MCD
+  sector: Consumer Discretionary
+  industry: Restaurants
+  size_tier: large
+  random_rank: 21
+- cik: '0001062231'
+  ticker: DCH
+  sector: Consumer Discretionary
+  industry: Automobiles and Components
+  size_tier: medium
+  random_rank: 22
+- cik: 0000075288
+  ticker: OXM
+  sector: Consumer Discretionary
+  industry: Apparel and Footwear
+  size_tier: small
+  random_rank: 23
+  replaces_cik: 0000884219
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: '0001043337'
+  ticker: SRI
+  sector: Consumer Discretionary
+  industry: Automobiles and Components
+  size_tier: small
+  random_rank: 24
+  replaces_cik: 0000764478
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: 0001336917
+  ticker: UAA
+  sector: Consumer Discretionary
+  industry: Apparel and Footwear
+  size_tier: medium
+  random_rank: 25
+  replaces_cik: 0001528849
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: 0000789570
+  ticker: MGM
+  sector: Consumer Discretionary
+  industry: Hotels and Lodging
+  size_tier: large
+  random_rank: 26
+- cik: 0001722684
+  ticker: WH
+  sector: Consumer Discretionary
+  industry: Hotels and Lodging
+  size_tier: medium
+  random_rank: 27
+- cik: '0001144215'
+  ticker: AYI
+  sector: Consumer Discretionary
+  industry: Household Durables
+  size_tier: medium
+  random_rank: 28
+- cik: 0001618756
+  ticker: QSR
+  sector: Consumer Discretionary
+  industry: Restaurants
+  size_tier: large
+  random_rank: 29
+- cik: 0000026780
+  ticker: DAN
+  sector: Consumer Discretionary
+  industry: Automobiles and Components
+  size_tier: medium
+  random_rank: 30
+- cik: 0001031296
+  ticker: FE
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: large
+  random_rank: 1
+  replaces_cik: 0000922224
+  replacement_source: frozen_reserve
+- cik: '0001130310'
+  ticker: CNP
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: medium
+  random_rank: 2
+- cik: 0000784977
+  ticker: POR
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: small
+  random_rank: 3
+- cik: 0000731802
+  ticker: ATO
+  sector: Utilities
+  industry: Gas Utilities
+  size_tier: medium
+  random_rank: 4
+- cik: 0000019745
+  ticker: CPK
+  sector: Utilities
+  industry: Gas Utilities
+  size_tier: small
+  random_rank: 5
+- cik: 0000783325
+  ticker: WEC
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: large
+  random_rank: 6
+- cik: '0001111711'
+  ticker: NI
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: medium
+  random_rank: 7
+- cik: 0001004980
+  ticker: PCG
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: large
+  random_rank: 8
+  replaces_cik: 0000104918
+  replacement_source: frozen_reserve
+- cik: '0000072741'
+  ticker: ES
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: large
+  random_rank: 9
+  replaces_cik: 0000078128
+  replacement_source: frozen_reserve
+- cik: 0000827052
+  ticker: EIX
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: large
+  random_rank: 10
+- cik: '0000764622'
+  ticker: PNW
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: medium
+  random_rank: 11
+- cik: 0001057877
+  ticker: IDA
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: small
+  random_rank: 12
+- cik: 0001692115
+  ticker: SWX
+  sector: Utilities
+  industry: Gas Utilities
+  size_tier: medium
+  random_rank: 13
+- cik: '0001035201'
+  ticker: CWT
+  sector: Utilities
+  industry: Water Utilities
+  size_tier: small
+  random_rank: 14
+  replaces_cik: 0000356309
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: 0001047862
+  ticker: ED
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: large
+  random_rank: 15
+- cik: 0000884614
+  ticker: UGI
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: medium
+  random_rank: 16
+- cik: 0001056903
+  ticker: AWR
+  sector: Utilities
+  industry: Water Utilities
+  size_tier: small
+  random_rank: 17
+- cik: '0000755001'
+  ticker: UTL
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: small
+  random_rank: 18
+  replaces_cik: 0000936340
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: 0001733998
+  ticker: NWN
+  sector: Utilities
+  industry: Gas Utilities
+  size_tier: small
+  random_rank: 19
+  replaces_cik: '0001021635'
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: 0001108426
+  ticker: TXNM
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: small
+  random_rank: 20
+- cik: 0001126956
+  ticker: SR
+  sector: Utilities
+  industry: Gas Utilities
+  size_tier: small
+  random_rank: 21
+- cik: '0001326160'
+  ticker: DUK
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: large
+  random_rank: 22
+- cik: 0000811156
+  ticker: CMS
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: medium
+  random_rank: 23
+- cik: 0001013871
+  ticker: NRG
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: large
+  random_rank: 24
+- cik: 0001567683
+  ticker: CWEN
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: medium
+  random_rank: 25
+- cik: '0001130464'
+  ticker: BKH
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: small
+  random_rank: 26
+  replaces_cik: '0000070145'
+  replacement_source: deterministic_expanded_candidate_pool
+- cik: 0000788784
+  ticker: PEG
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: large
+  random_rank: 27
+- cik: 0001002910
+  ticker: AEE
+  sector: Utilities
+  industry: Multi-Utilities
+  size_tier: medium
+  random_rank: 28
+- cik: 0000715957
+  ticker: D
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: large
+  random_rank: 29
+- cik: 0001692819
+  ticker: VST
+  sector: Utilities
+  industry: Electric Utilities
+  size_tier: medium
+  random_rank: 30
+reserve: []
+notes:
+- Every selected company passed all three Stage 8 KPI and lineage gates.
+- Replacements used frozen same-sector reserves first, then deterministic candidate scores.
+- No deterioration labels, event prevalence, or model results influenced replacement.
+- No certified unused Utilities reserves remain under the current strict rules.

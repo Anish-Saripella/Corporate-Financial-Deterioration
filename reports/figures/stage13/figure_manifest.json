@@ -1,0 +1,24 @@
+{
+  "theme_version": "publication-theme-v1",
+  "title_prefix": "Corporate Financial Deterioration",
+  "figures": [
+    {
+      "slug": "01-forecast-rmse-by-kpi-and-horizon",
+      "title": "Forecast RMSE by KPI and horizon",
+      "description": "All five candidates are compared at identical company-level origins.",
+      "files": [
+        "reports/figures/stage13/01-forecast-rmse-by-kpi-and-horizon.png",
+        "reports/figures/stage13/01-forecast-rmse-by-kpi-and-horizon.svg"
+      ]
+    },
+    {
+      "slug": "02-forecast-interval-coverage",
+      "title": "Forecast interval coverage",
+      "description": "Empirical coverage is shown against the nominal 95% reference.",
+      "files": [
+        "reports/figures/stage13/02-forecast-interval-coverage.png",
+        "reports/figures/stage13/02-forecast-interval-coverage.svg"
+      ]
+    }
+  ]
+}

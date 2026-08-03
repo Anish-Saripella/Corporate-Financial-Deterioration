@@ -3,8 +3,8 @@
 ## Population and selection date
 
 The project studies a fixed universe of currently listed US operating companies as of
-2025-12-31. It targets 30 Consumer Discretionary and 30 Utilities issuers after screening a
-rules-based candidate universe.
+2026-08-02, using financial history through 2025-12-31. It targets 30 Consumer Discretionary and
+30 Utilities issuers after screening a rules-based candidate universe.
 
 ## Eligibility
 
@@ -22,6 +22,31 @@ rules-based candidate universe.
 
 Every candidate receives `included`, a controlled `reason_code`, and supporting evidence in the
 universe audit table.
+
+## Reproducible sampling
+
+After applying all eligibility rules, select companies by stratified random sampling without
+replacement using the project seed `20260802`. Stratify by sector, broad industry, and three
+filing-derived size tiers based primarily on median total assets during the development period.
+Maintain a deterministic reserve order.
+
+Before modeling, Stage 8 applies stricter company-level certification to all three required KPIs.
+Each company must pass the same coverage, continuity, mapping, lineage, and point-in-time rules.
+Failure of any KPI triggers replacement by the next same-sector reserve; KPI-specific modeling
+subsets are not used. Each replacement must pass identical rules and produce a versioned audit
+record. If reserves are insufficient, expand the candidate pool transparently rather than lowering
+standards.
+
+Stage 8 produced universe version `selected-universe-v2-certified`. Fourteen original selections
+failed at least one strict KPI gate. Four frozen reserves and ten companies from the deterministic
+expanded candidate order replaced them within the same sector. The final universe has 30 issuers
+per sector, all 60 pass every KPI and lineage rule, and no unused reserve remains. The complete
+before/after evidence is generated as `reports/generated/universe_replacements.csv`.
+
+Do not change the seed or redraw the sample because of outcome prevalence or model performance.
+If the frozen selection produces an infeasible event count, expand the sample using the reserve
+order up to a maximum of 80 companies and document the scope change. Do not redraw the original
+sample or search for a different random seed.
 
 ## Known limitation
 

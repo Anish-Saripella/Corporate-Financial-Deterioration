@@ -1,0 +1,53 @@
+version: feature-registry-v1
+entity_keys: [cik, decision_at]
+excluded_from_modeling:
+  - company_name
+  - ticker
+  - accession_numbers_json
+  - deterioration_label
+  - deterioration_episode_start
+numeric_features:
+  - interest_coverage_ttm
+  - free_cash_flow_margin_ttm
+  - total_debt_to_assets
+  - operating_margin_ttm
+  - current_ratio
+  - cash_to_assets
+  - interest_coverage_ttm_yoy_change
+  - free_cash_flow_margin_ttm_yoy_change
+  - total_debt_to_assets_yoy_change
+  - interest_coverage_ttm_trend_4q
+  - free_cash_flow_margin_ttm_trend_4q
+  - total_debt_to_assets_trend_4q
+  - interest_coverage_ttm_volatility_4q
+  - free_cash_flow_margin_ttm_volatility_4q
+  - total_debt_to_assets_volatility_4q
+  - interest_coverage_ttm_sector_percentile
+  - free_cash_flow_margin_ttm_sector_percentile
+  - total_debt_to_assets_sector_percentile
+  - DFF
+  - T10Y2Y
+  - BAA10Y
+  - UNRATE
+  - INDPRO_yoy_change
+  - RSAFS_yoy_change
+  - utility_x_leverage
+  - discretionary_x_retail_sales_yoy
+categorical_features:
+  - sector
+  - industry
+missing_indicators:
+  suffix: _missing
+  create_for_all_numeric_features: true
+preprocessing:
+  fit_within_temporal_fold: true
+  numeric_imputation: training_median_with_missing_indicator
+  clipping: training_1st_and_99th_percentiles
+  scaling_logistic_regression: training_standard_scaler
+  scaling_tree_models: none
+  categorical_encoding: training_one_hot_handle_unknown_ignore
+feature_selection:
+  fit_within_temporal_fold: true
+  remove_zero_variance: true
+  correlation_threshold: 0.95
+  primary_selection: regularized_logistic_or_tree_importance_inside_fold

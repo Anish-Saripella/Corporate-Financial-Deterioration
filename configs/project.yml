@@ -4,6 +4,14 @@ project:
   timezone: America/Chicago
   random_seed: 20260802
 
+versions:
+  scope: phase1-v1
+  universe: current-listed-certified-v2
+  label: debt-service-deterioration-frozen-v1
+  features: leakage-safe-historical-features-v1
+  sec_concept_mapping: us-gaap-v1
+  sic_mapping: sic-sector-v1
+
 scope:
   start_date: 2012-01-01
   end_date: 2025-12-31
@@ -41,6 +49,6 @@ validation:
   strategy: expanding_window
   minimum_training_quarters: 24
   forecast_horizons: [1, 4]
-  preliminary_holdout_start: 2024-01-01
+  preliminary_holdout_start: 2023-01-01
   final_holdout_requires_event_audit: true
   random_train_test_split_allowed: false

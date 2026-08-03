@@ -24,6 +24,15 @@ class ProjectMetadata(StrictModel):
     random_seed: int
 
 
+class Versions(StrictModel):
+    scope: str
+    universe: str
+    label: str
+    features: str
+    sec_concept_mapping: str
+    sic_mapping: str
+
+
 class Scope(StrictModel):
     start_date: date
     end_date: date
@@ -76,6 +85,7 @@ class Validation(StrictModel):
 
 class ProjectConfig(StrictModel):
     project: ProjectMetadata
+    versions: Versions
     scope: Scope
     storage: Storage
     source_policy: SourcePolicy

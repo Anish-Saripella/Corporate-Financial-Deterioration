@@ -1,0 +1,79 @@
+{
+  "theme_version": "publication-theme-v1",
+  "title_prefix": "Corporate Financial Deterioration",
+  "display_only_clipping": "1st and 99th percentiles where noted",
+  "figures": [
+    {
+      "slug": "01-kpi-distributions-by-sector",
+      "title": "KPI distributions by sector",
+      "description": "Boxplots use display-only 1st-99th percentile bounds; modeling values remain unchanged.",
+      "files": [
+        "reports/figures/stage10/01-kpi-distributions-by-sector.png",
+        "reports/figures/stage10/01-kpi-distributions-by-sector.svg"
+      ]
+    },
+    {
+      "slug": "02-sector-kpi-trajectories",
+      "title": "Sector KPI trajectories",
+      "description": "Quarterly sector medians show cyclical and defensive financial paths on a common timeline.",
+      "files": [
+        "reports/figures/stage10/02-sector-kpi-trajectories.png",
+        "reports/figures/stage10/02-sector-kpi-trajectories.svg"
+      ]
+    },
+    {
+      "slug": "03-deterioration-episodes-over-time",
+      "title": "Deterioration episodes over time",
+      "description": "Distinct episodes use the frozen four-quarter cooldown and are reported separately by sector.",
+      "files": [
+        "reports/figures/stage10/03-deterioration-episodes-over-time.png",
+        "reports/figures/stage10/03-deterioration-episodes-over-time.svg"
+      ]
+    },
+    {
+      "slug": "04-certified-kpi-coverage",
+      "title": "Certified KPI coverage",
+      "description": "Aggregate availability complements the stricter company-level coverage and continuity gates.",
+      "files": [
+        "reports/figures/stage10/04-certified-kpi-coverage.png",
+        "reports/figures/stage10/04-certified-kpi-coverage.svg"
+      ]
+    },
+    {
+      "slug": "05-leverage-and-interest-coverage-risk-map",
+      "title": "Leverage and interest-coverage risk map",
+      "description": "Each point combines leverage (debt as a percentage of assets) with debt-service capacity (operating income divided by interest expense, expressed as a multiple).",
+      "files": [
+        "reports/figures/stage10/05-leverage-and-interest-coverage-risk-map.png",
+        "reports/figures/stage10/05-leverage-and-interest-coverage-risk-map.svg"
+      ]
+    },
+    {
+      "slug": "06-certified-industry-composition",
+      "title": "Certified industry composition",
+      "description": "The final 30/30 sector design retains multiple industries instead of one dominant subsector.",
+      "files": [
+        "reports/figures/stage10/06-certified-industry-composition.png",
+        "reports/figures/stage10/06-certified-industry-composition.svg"
+      ]
+    },
+    {
+      "slug": "07-kpi-forecastability-diagnostics",
+      "title": "KPI forecastability diagnostics",
+      "description": "Persistence and signal-to-noise evidence informs the later baseline and state-space comparisons.",
+      "files": [
+        "reports/figures/stage10/07-kpi-forecastability-diagnostics.png",
+        "reports/figures/stage10/07-kpi-forecastability-diagnostics.svg"
+      ]
+    },
+    {
+      "slug": "08-kpi-macro-rank-correlations",
+      "title": "KPI and macro rank correlations",
+      "description": "Spearman correlations provide a restrained screen for macro inputs; they do not establish causality.",
+      "files": [
+        "reports/figures/stage10/08-kpi-macro-rank-correlations.png",
+        "reports/figures/stage10/08-kpi-macro-rank-correlations.svg"
+      ]
+    }
+  ]
+}

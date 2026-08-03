@@ -40,3 +40,62 @@ def make_deterioration_label(
                 future_minimum < absolute_threshold and relative_change >= relative_decline
             )
     return labels
+
+
+def deterioration_diagnostics(
+    frame: pd.DataFrame,
+    *,
+    entity_column: str = "cik",
+    time_column: str = "period_end",
+    coverage_column: str = "interest_coverage_ttm",
+    horizon: int = 4,
+    absolute_threshold: float = 1.5,
+    relative_decline: float = 0.40,
+    cooldown_quarters: int = 4,
+) -> pd.DataFrame:
+    """Return labels, future-window evidence, availability, and episode starts."""
+
+    result = frame.copy()
+    result["deterioration_label"] = make_deterioration_label(
+        result,
+        entity_column=entity_column,
+        time_column=time_column,
+        coverage_column=coverage_column,
+        horizon=horizon,
+        absolute_threshold=absolute_threshold,
+        relative_decline=relative_decline,
+    )
+    result["future_minimum_interest_coverage"] = np.nan
+    result["future_interest_coverage_relative_decline"] = np.nan
+    result["label_available_at"] = pd.NaT
+    result["deterioration_episode_start"] = False
+    result["already_below_coverage_threshold"] = result[coverage_column] < absolute_threshold
+    ordered = result.sort_values([entity_column, time_column])
+    for _, group in ordered.groupby(entity_column, sort=False):
+        episode_positions: list[int] = []
+        coverage = group[coverage_column].astype(float)
+        for position, index in enumerate(group.index):
+            future = coverage.iloc[position + 1 : position + horizon + 1]
+            if len(future) == horizon:
+                result.loc[index, "label_available_at"] = group["decision_at"].iloc[
+                    position + horizon
+                ]
+            current = coverage.iloc[position]
+            if len(future) < horizon or pd.isna(current) or future.isna().any():
+                continue
+            future_minimum = float(future.min())
+            decline = (current - future_minimum) / max(abs(current), np.finfo(float).eps)
+            result.loc[index, "future_minimum_interest_coverage"] = future_minimum
+            result.loc[index, "future_interest_coverage_relative_decline"] = decline
+            if result.loc[index, "deterioration_label"] != 1:
+                continue
+            quarter_position = int(result.loc[index, "fiscal_year"]) * 4 + int(
+                result.loc[index, "fiscal_quarter_number"]
+            )
+            if (
+                not episode_positions
+                or quarter_position - episode_positions[-1] >= cooldown_quarters
+            ):
+                result.loc[index, "deterioration_episode_start"] = True
+                episode_positions.append(quarter_position)
+    return result

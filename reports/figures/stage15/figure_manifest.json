@@ -1,0 +1,33 @@
+{
+  "theme_version": "publication-theme-v1",
+  "title_prefix": "Corporate Financial Deterioration",
+  "figures": [
+    {
+      "slug": "01-champion-calibration",
+      "title": "Champion probability calibration",
+      "description": "Development out-of-fold and one-time locked-holdout calibration are separated.",
+      "files": [
+        "reports/figures/stage15/01-champion-calibration.png",
+        "reports/figures/stage15/01-champion-calibration.svg"
+      ]
+    },
+    {
+      "slug": "02-holdout-performance-by-sector",
+      "title": "Locked-holdout performance by sector",
+      "description": "Sector slices expose stability and asymmetric alert quality.",
+      "files": [
+        "reports/figures/stage15/02-holdout-performance-by-sector.png",
+        "reports/figures/stage15/02-holdout-performance-by-sector.svg"
+      ]
+    },
+    {
+      "slug": "03-champion-feature-importance",
+      "title": "Champion feature importance",
+      "description": "Importance is descriptive and does not imply causal effect.",
+      "files": [
+        "reports/figures/stage15/03-champion-feature-importance.png",
+        "reports/figures/stage15/03-champion-feature-importance.svg"
+      ]
+    }
+  ]
+}

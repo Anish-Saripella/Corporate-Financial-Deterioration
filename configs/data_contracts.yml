@@ -1,0 +1,98 @@
+version: phase1-contracts-v1
+tables:
+  issuer_candidates:
+    grain: one row per CIK at universe selection date
+    primary_key: [selection_as_of, cik]
+    required_columns: [selection_as_of, cik, company_name, ticker, exchange, sic, sector, industry]
+  financial_facts_raw:
+    grain: one row per company-concept-unit-XBRL context and accession
+    primary_key: [cik, concept, taxonomy_tag, unit, start_date, end_date, filed_at, accession_number]
+    required_columns: [cik, concept, taxonomy_tag, unit, end_date, filed_at, accession_number, value]
+  company_fiscal_quarters:
+    grain: one row per CIK-fiscal year-fiscal quarter-concept as known at extraction cutoff
+    primary_key: [cik, fiscal_year, fiscal_quarter, concept]
+    required_columns: [cik, fiscal_year, fiscal_quarter, concept, value, available_at, accession_number]
+  macro_vintages:
+    grain: one row per series-observation-real-time interval
+    primary_key: [series_id, observation_date, realtime_start, realtime_end]
+    required_columns: [series_id, observation_date, realtime_start, realtime_end, value]
+  company_eligibility:
+    grain: one row per candidate CIK
+    primary_key: [cik]
+    required_columns: [cik, sector, usable_quarters, core_field_coverage, eligible, reason_codes]
+  selected_universe:
+    grain: one row per eligible CIK
+    primary_key: [cik]
+    required_columns: [cik, sector, industry, size_tier, selection_status, random_rank]
+  company_modeling_certification:
+    grain: one row per CIK and certification rule
+    primary_key: [universe_version, cik, rule_code]
+    required_columns: [universe_version, cik, sector, rule_code, passed, observed_value, required_value, evidence_as_of]
+  universe_replacements:
+    grain: one row per pre-model company replacement
+    primary_key: [resulting_universe_version, removed_cik]
+    required_columns: [resulting_universe_version, removed_cik, replacement_cik, sector, failed_rule_code, replacement_rank, decided_at]
+  point_in_time_panel:
+    grain: one row per selected CIK and filing-aware fiscal-quarter decision
+    primary_key: [decision_key]
+    required_columns: [decision_key, cik, decision_at, period_end, sector, industry, interest_coverage_ttm, free_cash_flow_margin_ttm, total_debt_to_assets, maximum_source_available_at, macro_available_at_max]
+  labeled_company_quarters:
+    grain: one row per certified company decision
+    primary_key: [decision_key]
+    required_columns: [decision_key, deterioration_label, label_available_at, deterioration_episode_start, future_minimum_interest_coverage]
+  model_features:
+    grain: one row per certified company decision
+    primary_key: [decision_key]
+    required_columns: [decision_key, cik, decision_at, feature_available_at, sector, industry]
+  temporal_split_assignments:
+    grain: one row per decision, temporal fold, and split assignment
+    primary_key: [decision_key, fold_id, split]
+    required_columns: [decision_key, cik, decision_at, fold_id, split]
+  forecast_backtest_predictions:
+    grain: one row per fold-company-KPI-model-horizon forecast
+    primary_key: [fold_id, cik, kpi, model, horizon]
+    required_columns: [fold_id, cik, sector, origin_at, target_at, kpi, model, horizon, actual, forecast, lower, upper]
+  forecast_features:
+    grain: one row per company decision
+    primary_key: [decision_key]
+    required_columns: [decision_key, forecast_feature_available_at, forecast_interest_coverage_4q, forecast_free_cash_flow_margin_4q, forecast_total_debt_to_assets_4q]
+  classifier_oof_predictions:
+    grain: one row per validation decision-model-feature increment
+    primary_key: [decision_key, fold_id, model, feature_increment]
+    required_columns: [decision_key, fold_id, model, feature_increment, probability, threshold, alert]
+  final_holdout_predictions:
+    grain: one row per labeled locked-holdout company decision
+    primary_key: [decision_key]
+    required_columns: [decision_key, model, feature_increment, probability, threshold, alert]
+
+reason_codes:
+  - NOT_TARGET_SECTOR
+  - INELIGIBLE_EXCHANGE
+  - NOT_DOMESTIC_10K_FILER
+  - INSUFFICIENT_PRELIMINARY_FILING_HISTORY
+  - EXCLUDED_ENTITY_TYPE
+  - NON_REGULATED_ENERGY_INFRASTRUCTURE
+  - NOT_PUBLIC_COMMON_EQUITY
+  - NON_DISCRETIONARY_RETAIL
+  - INSUFFICIENT_USABLE_QUARTERS
+  - INSUFFICIENT_CONSECUTIVE_QUARTERS
+  - INSUFFICIENT_CORE_FIELD_COVERAGE
+  - INSUFFICIENT_INTEREST_EXPENSE_HISTORY
+  - UNRESOLVED_XBRL_MAPPING
+  - SELECTED
+  - RESERVE
+  - KPI_INTEREST_COVERAGE_TTM_OBSERVATIONS
+  - KPI_INTEREST_COVERAGE_TTM_CONTINUITY
+  - KPI_INTEREST_COVERAGE_TTM_COVERAGE
+  - KPI_FREE_CASH_FLOW_MARGIN_TTM_OBSERVATIONS
+  - KPI_FREE_CASH_FLOW_MARGIN_TTM_CONTINUITY
+  - KPI_FREE_CASH_FLOW_MARGIN_TTM_COVERAGE
+  - KPI_TOTAL_DEBT_TO_ASSETS_OBSERVATIONS
+  - KPI_TOTAL_DEBT_TO_ASSETS_CONTINUITY
+  - KPI_TOTAL_DEBT_TO_ASSETS_COVERAGE
+  - ESSENTIAL_MAPPING_UNRESOLVED
+  - MATERIAL_LINEAGE_BREAK
+  - DUPLICATE_DECISION_KEY
+  - POINT_IN_TIME_LEAKAGE
+  - MACRO_VINTAGE_LEAKAGE
+  - CERTIFIED_FOR_MODELING
