@@ -1,0 +1,46 @@
+project:
+  name: corporate-financial-deterioration
+  version: 0.1.0
+  timezone: America/Chicago
+  random_seed: 20260802
+
+scope:
+  start_date: 2012-01-01
+  end_date: 2025-12-31
+  prediction_horizon_fiscal_quarters: 4
+  final_company_count: 60
+  candidate_company_count_min: 100
+  candidate_company_count_max: 150
+  sectors:
+    - Consumer Discretionary
+    - Utilities
+  forecast_kpis:
+    - interest_coverage
+    - free_cash_flow_margin
+    - total_debt_to_assets
+  primary_outcome: debt_service_deterioration
+
+storage:
+  data_dir: data
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  manifests_dir: data/manifests
+  duckdb_path: data/processed/cfd.duckdb
+  tableau_export_dir: dashboards/tableau/exports
+
+source_policy:
+  free_public_only: true
+  allowed_sources:
+    - SEC EDGAR
+    - FRED/ALFRED
+  market_data_phase1: false
+  raw_data_committed_to_git: false
+
+validation:
+  strategy: expanding_window
+  minimum_training_quarters: 24
+  forecast_horizons: [1, 4]
+  preliminary_holdout_start: 2024-01-01
+  final_holdout_requires_event_audit: true
+  random_train_test_split_allowed: false

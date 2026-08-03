@@ -1,0 +1,23 @@
+label:
+  name: debt_service_deterioration
+  version: 0.1.0-candidate
+  status: candidate_pending_training_period_event_audit
+  horizon_fiscal_quarters: 4
+  source_kpi: interest_coverage_ttm
+  definition:
+    future_minimum_below: 1.5
+    relative_decline_at_least: 0.40
+    operator: AND
+  episode_policy:
+    collapse_consecutive_positive_rows: true
+    episode_cooldown_quarters: 4
+  edge_cases:
+    current_interest_coverage_floor: -20.0
+    current_interest_coverage_cap: 20.0
+    minimum_absolute_interest_expense: 1000000
+    negative_ebit_is_economically_valid: true
+  finalization_gates:
+    - Audit positive rows and distinct company episodes using development dates only.
+    - Inspect prevalence by sector, size, fiscal year, and recession period.
+    - Confirm the final holdout contains enough distinct episodes for evaluation.
+    - Freeze thresholds before final model comparison.

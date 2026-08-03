@@ -1,0 +1,25 @@
+universe:
+  selection_as_of: 2025-12-31
+  population: currently_listed_us_operating_companies
+  sectors:
+    Consumer Discretionary:
+      target_count: 30
+    Utilities:
+      target_count: 30
+  include:
+    exchanges: [NYSE, NASDAQ, NYSE American]
+    filing_forms: [10-K, 10-Q]
+    minimum_usable_quarters: 24
+    minimum_consecutive_quarters_before_prediction: 16
+    minimum_core_field_coverage: 0.80
+  exclude:
+    delisted_companies: true
+    funds_and_etfs: true
+    spacs_and_shells: true
+    banks_and_insurers: true
+    foreign_private_issuers: true
+    unusable_xbrl_histories: true
+  selection_notes:
+    - Excluding delisted issuers creates survivorship bias and narrows all claims to the fixed research universe.
+    - Exclusions must be generated from rules and stored with a machine-readable reason code.
+    - Model performance must be reported separately for each sector.

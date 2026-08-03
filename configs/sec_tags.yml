@@ -1,0 +1,97 @@
+concepts:
+  revenue:
+    statement: income
+    period_type: duration
+    unit: USD
+    preferred_tags:
+      - RevenueFromContractWithCustomerExcludingAssessedTax
+      - Revenues
+      - SalesRevenueNet
+  operating_income:
+    statement: income
+    period_type: duration
+    unit: USD
+    preferred_tags:
+      - OperatingIncomeLoss
+  interest_expense:
+    statement: income
+    period_type: duration
+    unit: USD
+    preferred_tags:
+      - InterestExpenseNonOperating
+      - InterestAndDebtExpense
+      - InterestExpense
+  net_income:
+    statement: income
+    period_type: duration
+    unit: USD
+    preferred_tags:
+      - NetIncomeLoss
+  operating_cash_flow:
+    statement: cash_flow
+    period_type: duration
+    unit: USD
+    preferred_tags:
+      - NetCashProvidedByUsedInOperatingActivities
+  capital_expenditures:
+    statement: cash_flow
+    period_type: duration
+    unit: USD
+    sign_policy: convert_cash_outflow_to_positive
+    preferred_tags:
+      - PaymentsToAcquirePropertyPlantAndEquipment
+      - PaymentsForProceedsFromPropertyPlantAndEquipment
+  cash_and_equivalents:
+    statement: balance_sheet
+    period_type: instant
+    unit: USD
+    preferred_tags:
+      - CashAndCashEquivalentsAtCarryingValue
+      - CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents
+  short_term_debt:
+    statement: balance_sheet
+    period_type: instant
+    unit: USD
+    preferred_tags:
+      - ShortTermBorrowings
+      - LongTermDebtCurrent
+  long_term_debt:
+    statement: balance_sheet
+    period_type: instant
+    unit: USD
+    preferred_tags:
+      - LongTermDebtNoncurrent
+      - LongTermDebt
+  total_assets:
+    statement: balance_sheet
+    period_type: instant
+    unit: USD
+    preferred_tags:
+      - Assets
+  current_assets:
+    statement: balance_sheet
+    period_type: instant
+    unit: USD
+    preferred_tags:
+      - AssetsCurrent
+  current_liabilities:
+    statement: balance_sheet
+    period_type: instant
+    unit: USD
+    preferred_tags:
+      - LiabilitiesCurrent
+
+derived_kpis:
+  interest_coverage:
+    formula: operating_income_ttm / interest_expense_ttm
+    economic_dimension: debt_service_capacity
+  free_cash_flow_margin:
+    formula: (operating_cash_flow_ttm - capital_expenditures_ttm) / revenue_ttm
+    economic_dimension: liquidity_generation
+  total_debt_to_assets:
+    formula: (short_term_debt + long_term_debt) / total_assets
+    economic_dimension: capital_structure
+  net_debt_to_ebitda:
+    status: secondary_diagnostic_only
+    formula: (short_term_debt + long_term_debt - cash_and_equivalents) / ebitda_ttm
+    validity_rule: ebitda_ttm > 0 and denominator_not_near_zero

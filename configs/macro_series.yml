@@ -1,0 +1,37 @@
+macro_series:
+  - series_id: DFF
+    name: effective_federal_funds_rate
+    frequency: daily
+    quarterly_aggregation: mean
+    vintage_required: false
+    rationale: Short-term financing-cost environment.
+  - series_id: T10Y2Y
+    name: treasury_10y_2y_spread
+    frequency: daily
+    quarterly_aggregation: mean
+    vintage_required: false
+    rationale: Yield-curve and cycle indicator.
+  - series_id: BAA10Y
+    name: baa_treasury_credit_spread
+    frequency: daily
+    quarterly_aggregation: mean
+    vintage_required: false
+    rationale: Corporate funding stress.
+  - series_id: UNRATE
+    name: unemployment_rate
+    frequency: monthly
+    quarterly_aggregation: mean
+    vintage_required: true
+    rationale: Consumer and aggregate demand conditions.
+  - series_id: INDPRO
+    name: industrial_production_index
+    frequency: monthly
+    quarterly_aggregation: mean
+    vintage_required: true
+    rationale: Real-economy activity and broad cycle conditions.
+  - series_id: RSAFS
+    name: advance_retail_sales
+    frequency: monthly
+    quarterly_aggregation: sum
+    vintage_required: true
+    rationale: Consumer Discretionary demand environment.
