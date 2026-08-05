@@ -133,102 +133,187 @@ Reproduce the completed modeling pipeline with:
 .venv/bin/cfd run-stages-13-16
 ```
 
-## Phase 2 plan and next steps
+## Phase 2 audit and implementation plan
 
-Phase 2 should improve the model before expanding presentation features. Every change must be
-tested on future time periods that were not used to fit or tune the model.
+Phase 1 is closed. Its frozen benchmark is the pooled gradient-boosted model with 0.397 holdout
+PR-AUC, 0.563 recall, 0.333 precision, 1.97x top-decile lift, and 0.159 Brier score. Phase 2 should
+focus on stronger evidence and model performance before adding presentation features.
 
-### 1. Improve the training sample
+The 2023-and-later holdout has now been evaluated and discussed. It is no longer an untouched test
+set and must not be reused to claim final Phase 2 performance. Phase 2 must reserve a new future
+period or use a prospective evaluation window that remains inaccessible until the model and alert
+policy are frozen.
 
-- Add delisted and financially distressed companies to reduce survivorship bias.
-- Expand beyond Consumer Discretionary and Utilities while retaining sector-level reporting.
-- Increase the number of deterioration events so performance estimates are less sensitive to a
-  small number of companies or quarters.
-- Review alternative deterioration definitions and horizons through planned sensitivity tests;
-  do not choose the definition that merely produces the best result after the fact.
+### Phase 1 audit: what should be improved
 
-### 2. Improve financial and economic features
+| Audit finding | Why it matters | Phase 2 response |
+|---|---|---|
+| Only 60 currently listed issuers | The sample excludes delisted firms and contains only 30 independent companies per sector, even though it has many quarterly rows. This limits generalization and understates severe distress. | Add delisted, acquired, bankrupt, and financially distressed histories; expand the number of issuers before increasing model complexity. |
+| Repeated and overlapping observations | Adjacent four-quarter labels share future quarters, so 3,150 rows are not 3,150 independent experiments. | Report company- and episode-level results; use issuer-clustered uncertainty estimates and embargoed temporal validation. |
+| One researcher-defined outcome | The 1.5x/40% coverage rule is interpretable but does not capture every form of financial deterioration. | Pre-register sensitivity tests for alternative thresholds, horizons, cash-flow stress, covenant-like pressure, and time-to-event outcomes. Do not select a label merely because it improves model metrics. |
+| Survivorship and sector scope | Results from two sectors of surviving public firms cannot represent the broader corporate-credit population. | Correct survivorship bias first, then add sectors in economically coherent groups with separate reporting. |
+| Utility classification is weaker | Utility holdout PR-AUC was 0.332 and precision was 0.225, versus 0.468 and 0.439 for Consumer Discretionary. | Diagnose label suitability, feature coverage, rate-regulation effects, capital-spending cycles, and sector calibration before choosing a separate model. |
+| Moderate overall alert precision | Approximately one in three Phase 1 alerts became an event under the study definition. | Add cost-sensitive threshold selection, review-capacity analysis, and features that distinguish temporary weakness from sustained deterioration. |
+| Distribution shift | The holdout alert rate exceeded the development design range and performance varied by temporal fold. | Add rolling-origin backtests, regime features, drift monitoring, and a new untouched future test period. |
+| Forecast intervals under-covered | Several four-quarter ranges were too narrow, making forecast uncertainty appear more reliable than it was. | Recalibrate intervals by KPI, sector, and horizon; test conformal or empirical residual intervals. |
+| Forecast features gave mixed benefits | Forecasts helped the boosted model in some development tests but not every fold or the logistic model. | Run an ablation test against current and historical ratios; retain forecasts only if improvement is stable and worth the added complexity. |
+| Probability quality varies by sector | A lower Brier score did not guarantee stronger ranking, and Utility calibration error remained material. | Evaluate discrimination and calibration separately; test sector-specific probability recalibration using training data only. |
+| Limited model comparison | Phase 1 appropriately emphasized logistic regression and constrained gradient boosting, but did not exhaust panel or time-to-event approaches. | Add interpretable panel, discrete-time hazard, and survival challengers before considering complex sequence models. |
+| No decision-cost validation | A statistical improvement may not improve an analyst's workload or financial decisions. | Define the cost of missed events and false alerts; compare top-5%, top-10%, and top-20% review queues using decision curves and expected value. |
 
-- Add debt maturity pressure, short-term debt share, liquidity reserves, profitability trend,
-  working-capital stress, capital-expenditure burden, and interest-expense growth where public data
-  quality supports them.
-- Add changes and trends—not only current levels—for coverage, margins, leverage, liquidity, and
-  operating performance.
-- Test more useful sector-relative measures because the normal range of a financial ratio differs
-  across industries.
-- Improve macroeconomic features with interest-rate changes, credit spreads, inflation, recession
-  indicators, and sector-sensitive economic variables using historically available values.
-- Measure missingness and reporting delays directly; late or incomplete reporting may itself carry
-  information, but it must be modeled without using future knowledge.
+### Should Phase 2 train separate sector models?
 
-### 3. Improve time-series forecasts
+Separate Utility and Consumer Discretionary models are reasonable **challengers**, but they should
+not automatically replace the pooled model. Phase 1 has approximately 30 issuers and roughly
+90–100 distinct deterioration episode starts per sector. Quarterly rows do not solve the small-
+sample problem because observations from the same company and overlapping future windows are
+related. Splitting the data would halve the issuer count available to each model, increase variance,
+weaken probability calibration, and make performance differences more sensitive to a few firms.
 
-- Compare the current structural models with seasonal baselines, autoregressive models, and pooled
-  panel forecasts that can learn from related companies.
-- Tune models separately by KPI and forecast horizon instead of assuming one method is best for
-  every target.
-- Improve four-quarter forecast ranges because several Phase 1 intervals were too narrow.
-- Test conformal prediction or other empirically calibrated intervals and require observed coverage
-  to remain close to the stated confidence level across sectors and time periods.
-- Evaluate whether forecast features truly improve the deterioration classifier beyond current
-  financial ratios; remove them if they add complexity without reliable out-of-sample value.
+The recommended comparison is:
 
-### 4. Improve classification performance
+1. A pooled benchmark with sector indicators and a small number of financially justified sector
+   interactions.
+2. A partially pooled or hierarchical model that learns common relationships while allowing some
+   coefficients or baselines to differ by sector.
+3. A pooled classifier with sector-specific probability calibration and alert thresholds.
+4. Fully separate sector models as challengers.
 
-- Tune logistic regression and gradient-boosted trees using nested, time-ordered validation so
-  model choices cannot learn from the final evaluation period.
-- Test class weighting and carefully controlled sampling approaches to improve event detection
-  without creating unrealistic event rates.
-- Optimize model settings for PR-AUC, recall, precision, calibration, and ranking lift together
-  rather than maximizing one metric.
-- Evaluate survival analysis for time-to-deterioration and panel models that account for repeated
-  observations from the same company.
-- Consider sequence models only after the expanded dataset is large enough to support them and only
-  if they outperform simpler baselines consistently across time and sectors.
-- Use repeated temporal backtests or bootstrap methods at the company level to add uncertainty
-  ranges around performance differences.
+The fully separate models should be promoted only if they improve repeated future-period PR-AUC,
+precision, calibration, and stability by more than the uncertainty around those differences. A
+useful planning target is at least 75–100 issuers and 150–200 distinct deterioration episodes per
+sector, including unsuccessful and delisted firms. This is a planning range, not a universal
+statistical rule. Learning curves and issuer-clustered confidence intervals should determine
+whether the final sample is sufficient.
 
-### 5. Improve sector performance and probability reliability
+### Phase 2 implementation workstreams
 
-- Investigate why Utilities had weaker PR-AUC and precision than Consumer Discretionary.
-- Test sector-specific models, shared models with sector interactions, and sector-specific
-  probability recalibration.
-- Compare Platt scaling and isotonic calibration using training-period data only.
-- Require reliability charts and calibration error by sector, time period, and risk band before
-  interpreting the probability as an absolute risk estimate.
+#### 1. Expand and strengthen the dataset
 
-### 6. Improve alert thresholds and analyst usefulness
+- Add delisted, bankrupt, acquired, and financially distressed issuers without using later outcomes
+  to decide inclusion.
+- Increase issuer and distinct-event counts in both existing sectors before fitting independent
+  sector models.
+- Preserve filing dates, amended filings, macro vintages, and source lineage under the existing
+  point-in-time policy.
+- Add sectors only after establishing a valid sector taxonomy, adequate issuer coverage, and an
+  economically appropriate KPI definition.
+- Create data-quality scores for tag mapping, filing delay, missingness, restatements, and unusual
+  denominators; test whether these signals have forward-looking value without leakage.
 
-- Choose alert thresholds using explicit costs for missed deterioration events and unnecessary
-  analyst reviews.
-- Report results at several possible review capacities—for example, the top 5%, 10%, and 20% of
-  companies—rather than relying on one threshold.
-- Add decision-curve or expected-value analysis to show whether model-guided review improves on
-  reviewing every company or selecting companies at random.
-- Conduct prospective shadow scoring: produce scores on schedule, do not act on them initially,
-  and compare predictions with outcomes as they become observable.
+#### 2. Revisit the outcome without optimizing it after the fact
 
-### 7. Improve interpretation and monitoring
+- Retain the Phase 1 label as the benchmark outcome.
+- Pre-register alternative coverage thresholds and two-, four-, and six-quarter horizons.
+- Test a multi-KPI outcome that combines debt-service weakness, cash-flow stress, and rising
+  leverage, while avoiding a label so complex that it becomes difficult to explain.
+- Evaluate discrete-time survival analysis so the model estimates when deterioration may occur and
+  properly handles observations whose future outcomes are not yet known.
+- Score performance by distinct deterioration episode as well as by company-quarter.
 
-- Provide company-level explanations that connect each alert to the source financial ratios,
-  recent changes, peer position, forecast direction, and uncertainty.
-- Distinguish predictive importance from causal explanation in every output.
-- Monitor changes in company mix, feature distributions, event rates, calibration, and model
-  performance over time.
-- Define retraining and review triggers before live monitoring begins.
+#### 3. Add financially motivated predictors
+
+- Debt structure: debt maturity pressure, short-term debt share, refinancing need, interest-expense
+  growth, fixed-charge burden, and debt issuance or repayment.
+- Liquidity and cash flow: cash reserves, current-ratio trend, working-capital requirements,
+  operating-cash-flow conversion, capital-expenditure burden, and dividend coverage.
+- Operating performance: revenue growth, margin trend, earnings volatility, asset turnover, and
+  profitability relative to sector peers.
+- Market and macro conditions: Treasury-rate changes, investment-grade and high-yield spreads,
+  inflation, unemployment, recession indicators, and sector-sensitive measures such as consumer
+  confidence or utility financing conditions.
+- Temporal features: quarter-over-quarter and year-over-year changes, rolling slopes, volatility,
+  drawdowns, distance from company history, and distance from sector norms.
+- Require an economic reason, documented availability date, missing-data treatment, and ablation
+  result for every retained feature group.
+
+#### 4. Improve forecasts and forecast uncertainty
+
+- Compare random walk and local-level benchmarks with autoregressive, robust trend, and pooled panel
+  forecasts by KPI and horizon.
+- Model company-level persistence while borrowing information from similar issuers when individual
+  histories are short.
+- Test seasonal terms only where non-TTM source data show repeatable fiscal-quarter effects; Phase 1
+  TTM ratios showed little aggregate seasonality.
+- Recalibrate four-quarter prediction intervals and require sector- and horizon-level coverage near
+  the stated confidence level.
+- Remove forecast-derived classifier features if their incremental out-of-sample value is unstable.
+
+#### 5. Improve classifier performance
+
+- Use nested expanding-window validation for hyperparameter and feature selection.
+- Compare regularized logistic regression, constrained gradient boosting, partially pooled sector
+  models, discrete-time hazard models, and carefully controlled panel approaches.
+- Test class weighting and focal or cost-sensitive objectives; avoid naive row oversampling that
+  duplicates correlated quarterly observations and distorts event prevalence.
+- Tune the alert policy separately from probability estimation.
+- Use company-clustered bootstrap intervals or repeated temporal backtests to determine whether an
+  apparent improvement is larger than sampling uncertainty.
+- Consider sequence neural networks only after dataset expansion and only if they beat interpretable
+  models consistently across sectors, regimes, and future periods.
+
+#### 6. Improve calibration and sector treatment
+
+- Compare pooled, partially pooled, sector-calibrated, and fully separate models using the same
+  folds, features, and evaluation periods.
+- Test Platt scaling, isotonic calibration, and intercept-only recalibration using training-period
+  predictions only.
+- Produce reliability charts, calibration error, and Brier decomposition by sector, time period,
+  risk band, and company size.
+- Examine whether the Utility label needs additional sector context, such as capital-expenditure
+  cycles and regulatory cost-recovery timing, rather than assuming weaker ratios equal distress.
+- Freeze the chosen sector architecture before opening the new Phase 2 test period.
+
+#### 7. Improve thresholds and analyst usefulness
+
+- Define the relative cost of a missed deterioration event and an unnecessary review.
+- Report precision, recall, event capture, and expected workload at the top 5%, 10%, and 20% of
+  scores and at any proposed fixed threshold.
+- Add decision-curve or expected-value analysis against reviewing every company, reviewing none,
+  and random or ratio-only screening.
+- Perform analyst case reviews of true positives, false positives, false negatives, and unstable
+  predictions to identify missing financial context.
+- Run prospective shadow scoring on a fixed schedule before claiming operational usefulness.
+
+#### 8. Improve interpretation, monitoring, and governance
+
+- Provide company-level explanations connecting alerts to source ratios, recent changes, peer
+  position, forecasts, macro conditions, and uncertainty.
+- Separate predictive association from causal or management-action claims.
+- Monitor source freshness, company mix, missingness, feature drift, event rate, ranking, calibration,
+  and alert volume.
+- Define retraining, recalibration, and escalation triggers before prospective monitoring begins.
+- Version the Phase 2 data freeze, label, features, folds, model selection record, threshold policy,
+  and final evaluation report.
+
+### Recommended execution order
+
+1. Freeze the Phase 1 release and register the 2023+ holdout as a consumed benchmark.
+2. Expand the issuer universe and recover delisted/distressed histories.
+3. Rebuild the point-in-time panel and audit new data quality.
+4. Pre-register outcome sensitivity tests and a new untouched evaluation period.
+5. Establish refreshed naive, logistic, and Phase 1-equivalent baselines.
+6. Run feature and forecasting ablations using nested temporal validation.
+7. Compare pooled, partially pooled, sector-calibrated, and separate-sector models.
+8. Select probability calibration and alert thresholds using development data only.
+9. Freeze the complete Phase 2 design and evaluate once on the new test period.
+10. Conduct shadow monitoring and publish the Phase 2 model card, data card, and research update.
 
 ### Phase 2 acceptance criteria
 
 Phase 2 should be accepted only if it demonstrates:
 
-- stronger and more stable PR-AUC than the Phase 1 model across multiple future periods;
-- improved precision without an unacceptable reduction in recall, or a clearly justified trade-off;
-- probability calibration that remains reliable across sectors and time periods;
-- forecast intervals with observed coverage close to their stated level;
-- reduced Consumer Discretionary–Utilities performance gaps;
-- uncertainty ranges showing that improvements are unlikely to be random sample variation; and
-- a documented analyst-review benefit under realistic workload assumptions.
+- stronger and more stable PR-AUC than the 0.397 Phase 1 benchmark across multiple future periods;
+- improved precision relative to 0.333 without an unacceptable reduction in the 0.563 recall, or a
+  documented cost-based reason for the trade-off;
+- reliable sector- and time-specific calibration, assessed alongside the 0.159 Phase 1 Brier score;
+- reduced uncertainty and a defensible improvement in Utility ranking and alert precision;
+- forecast intervals with observed coverage close to their stated confidence level;
+- gains that remain after company-clustered uncertainty analysis and label-sensitivity checks;
+- evidence that added forecasts or complex models outperform simpler baselines consistently;
+- a documented analyst-review benefit under realistic workload assumptions; and
+- one-time evaluation on a genuinely untouched Phase 2 test period.
 
-Power BI work is optional. If an interactive interface is revisited, prefer a code-native dashboard
-that can be versioned and tested with the Python pipeline unless Power BI is specifically required
-for a target role or audience.
+Power BI remains optional and is not part of the Phase 2 analytical acceptance criteria. If an
+interactive interface is revisited, prefer a code-native dashboard that can be versioned and tested
+with the Python pipeline unless Power BI is specifically required for a target role or audience.
