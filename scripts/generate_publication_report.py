@@ -156,10 +156,13 @@ def make_figures(watch: pd.DataFrame, model: pd.DataFrame, portfolio: pd.DataFra
     counts = watch.groupby(["sector", "risk_band"]).size().unstack(fill_value=0).reindex(columns=bands)
     ax = counts.plot(kind="bar", stacked=True, color=["#5B8FF9", "#F6BD16", "#E8684A", "#B42318"], figsize=(8.2, 4.2))
     ax.set(xlabel="", ylabel="Companies")
-    ax.set_title("Latest risk-band composition by sector", pad=28)
+    ax.set_title("Latest risk-band composition by sector", pad=42)
     ax.tick_params(axis="x", rotation=0)
-    ax.legend(title="Risk band", ncol=4, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.10))
-    plt.tight_layout(); plt.savefig(FIG / "risk_band_by_sector.png", dpi=220); plt.close()
+    ax.legend(ncol=4, frameon=False, loc="upper center", bbox_to_anchor=(0.5, 1.075),
+              columnspacing=1.5, handletextpad=0.6)
+    fig = ax.get_figure()
+    fig.subplots_adjust(top=0.78, bottom=0.16, left=0.10, right=0.98)
+    plt.savefig(FIG / "risk_band_by_sector.png", dpi=220); plt.close()
 
     top = watch.nlargest(10, "probability").sort_values("probability")
     colors = ["#B42318" if x == "Severe" else "#D97706" for x in top["risk_band"]]
