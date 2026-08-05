@@ -133,6 +133,25 @@ Reproduce the completed modeling pipeline with:
 .venv/bin/cfd run-stages-13-16
 ```
 
+## Project progress record
+
+This milestone log documents the transition from Phase 1 completion to Phase 2 planning. Commit
+identifiers provide a permanent link between the stated milestone and the repository contents.
+
+| Date | Milestone | Evidence |
+|---|---|---|
+| 2026-08-04 | Completed the reproducible Phase 1 analytical release and initial research report. | Commit `c5806ba` |
+| 2026-08-05 | Expanded the Phase 1 report with sector KPI, time-series, seasonality, and financial interpretation. | Commit `3ed84ed` |
+| 2026-08-05 | Completed the review cycle covering chart legibility, hypothesis conclusions, plain-language methodology, sector operating characteristics, and the distinction between model performance and sector risk. | Commits `6eafe95` through `f668142` |
+| 2026-08-05 | Finalized and pushed the Phase 1 report in both PDF and Word formats with its reproducible generation script and supporting figures. | Final Phase 1 report commit `f668142` |
+| 2026-08-05 | Formally closed Phase 1 and documented the Phase 2 model-improvement audit, workstreams, execution order, and acceptance criteria. | Commit `652e196` |
+
+The committed Phase 1 publication files are:
+
+- [`Corporate_Financial_Deterioration_Phase1_Research_Report.pdf`](reports/publication/Corporate_Financial_Deterioration_Phase1_Research_Report.pdf)
+- [`Corporate_Financial_Deterioration_Phase1_Research_Report.docx`](reports/publication/Corporate_Financial_Deterioration_Phase1_Research_Report.docx)
+- [`generate_publication_report.py`](scripts/generate_publication_report.py)
+
 ## Phase 2 audit and implementation plan
 
 Phase 1 is closed. Its frozen benchmark is the pooled gradient-boosted model with 0.397 holdout
