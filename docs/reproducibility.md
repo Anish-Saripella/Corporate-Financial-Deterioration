@@ -20,7 +20,8 @@
 - Random seeds and configurations are versioned.
 - Fold boundaries, fitted preprocessing, features, metrics, and artifacts are logged.
 - Final metrics derive from out-of-fold or final forward predictions.
-- Tableau backtest exports never mix in-sample fitted predictions with evaluation results.
+- Power BI development probabilities and metrics are out of fold; the final holdout is labeled
+  separately and unscored training/history rows remain unscored.
 
 ## Public repository checklist
 

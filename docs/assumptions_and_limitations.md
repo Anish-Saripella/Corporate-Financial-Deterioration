@@ -35,10 +35,16 @@ holdout performance show useful ranking lift, but precision is modest, particula
 Feature importance is associational and not causal. The alert threshold is a research threshold,
 not an approved credit policy, and the 2023+ holdout is not retuned after evaluation.
 
-The Tableau watchlist shows the latest evaluated prediction for each company, which may have a
+The Power BI watchlist shows the latest evaluated prediction for each company, which may have a
 different filing decision date across issuers. It does not invent scores for unavailable future
 labels or display in-sample fitted probabilities. Dashboard data may become stale after new filings;
 the displayed freshness date and source manifests should be checked before interpretation.
+
+The delivered PBIX is a valid package with an embedded data model, four named pages, and headline
+KPIs that reconcile to the certified import workbook. The supplied authoring-canvas screenshots
+also expose several unbound placeholder visuals. Until those bindings receive a final Power BI
+Desktop pass and refreshed screenshots, the report is analytically auditable but not fully
+presentation-ready.
 
 ## Appropriate interpretation
 

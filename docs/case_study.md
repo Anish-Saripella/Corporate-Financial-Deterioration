@@ -32,8 +32,8 @@ used to retune the model.
 
 ## Product and lessons
 
-A Dagster asset graph, DuckDB/Parquet store, manifests, tests, model card, and four Tableau-ready
-views turn the analysis into a reproducible product. The dashboard connects portfolio aggregates,
+A Dagster asset graph, DuckDB/Parquet store, manifests, tests, model card, and four Power BI views
+turn the analysis into a reproducible product. The dashboard connects portfolio aggregates,
 an analyst watchlist, company KPI histories, and champion–challenger metrics. The most important
 lesson is governance: point-in-time availability, fold-local preprocessing, a frozen label, and an
 untouched holdout matter more than adding every possible model. The result is a credible screening

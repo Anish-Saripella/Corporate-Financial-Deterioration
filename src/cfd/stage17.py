@@ -1,4 +1,4 @@
-"""Stage 17 Tableau delivery extracts and publication reconciliation."""
+"""Stage 17 Power BI delivery extracts and publication reconciliation."""
 
 from __future__ import annotations
 
@@ -257,7 +257,7 @@ def _reconcile(
 
 def run_stage_17() -> dict[str, Any]:
     root = repository_root()
-    export_directory = root / "dashboards" / "tableau" / "exports"
+    export_directory = root / "dashboards" / "powerbi" / "exports"
     reports = root / "reports" / "generated"
     export_directory.mkdir(parents=True, exist_ok=True)
     features = pd.read_parquet(
@@ -277,7 +277,7 @@ def run_stage_17() -> dict[str, Any]:
     for name, frame in outputs.items():
         frame.to_csv(export_directory / f"{name}.csv", index=False, date_format="%Y-%m-%d")
     reconciliation = _reconcile(overview, watchlist, history, performance)
-    reconciliation.to_csv(reports / "tableau_reconciliation.csv", index=False)
+    reconciliation.to_csv(reports / "powerbi_reconciliation.csv", index=False)
     result = {
         "status": "complete",
         "stage": 17,
@@ -287,8 +287,13 @@ def run_stage_17() -> dict[str, Any]:
         "companies": int(watchlist["cik"].nunique()),
         "reconciliation_checks_passed": int(reconciliation["passed"].sum()),
         "backtest_policy": "OOF development predictions only; holdout labeled separately",
-        "tableau_workbook": "dashboards/tableau/Corporate_Financial_Deterioration.twb",
-        "tableau_package": "dashboards/tableau/Corporate_Financial_Deterioration.twbx",
+        "powerbi_import_workbook": (
+            "outputs/powerbi_stage17/"
+            "Corporate_Financial_Deterioration_PowerBI_Import.xlsx"
+        ),
+        "powerbi_report": (
+            "dashboards/powerbi/deliverables/Corporate_Financial_Deterioration.pbix"
+        ),
         "dashboard_pages": [
             "Portfolio Overview",
             "Analyst Watchlist",

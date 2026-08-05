@@ -1,4 +1,4 @@
-"""Tests for Stage 17 Tableau delivery semantics."""
+"""Tests for Stage 17 Power BI delivery semantics."""
 
 import pandas as pd
 

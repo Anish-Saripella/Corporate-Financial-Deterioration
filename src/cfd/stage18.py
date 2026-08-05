@@ -1,4 +1,4 @@
-"""Stage 18 reproducibility and public-release audit."""
+"""Stage 18 reproducibility and Power BI public-release audit."""
 
 from __future__ import annotations
 
@@ -8,7 +8,6 @@ import re
 import zipfile
 from pathlib import Path
 from typing import Any
-from xml.etree import ElementTree
 
 import pandas as pd
 
@@ -26,7 +25,7 @@ def _sha256(path: Path) -> str:
 
 def validate_phase1_release() -> pd.DataFrame:
     root = repository_root()
-    exports = root / "dashboards" / "tableau" / "exports"
+    exports = root / "dashboards" / "powerbi" / "exports"
     checks: list[dict[str, Any]] = []
 
     def add(category: str, check: str, passed: bool, evidence: Any) -> None:
@@ -55,26 +54,33 @@ def validate_phase1_release() -> pd.DataFrame:
                 len(pd.read_csv(path)) > 0,
                 len(pd.read_csv(path)),
             )
-    reconciliation = pd.read_csv(root / "reports" / "generated" / "tableau_reconciliation.csv")
+    reconciliation = pd.read_csv(root / "reports" / "generated" / "powerbi_reconciliation.csv")
     add(
         "dashboard",
-        "tableau_reconciliation",
+        "powerbi_reconciliation",
         bool(reconciliation["passed"].all()),
         len(reconciliation),
     )
 
-    workbook = root / "dashboards" / "tableau" / "Corporate_Financial_Deterioration.twb"
+    deliverables = root / "dashboards" / "powerbi" / "deliverables"
+    workbook = deliverables / "Corporate_Financial_Deterioration.pbix"
     try:
-        ElementTree.parse(workbook)
-        workbook_valid = True
-    except (ElementTree.ParseError, FileNotFoundError):
+        with zipfile.ZipFile(workbook) as archive:
+            package_files = set(archive.namelist())
+            layout = json.loads(archive.read("Report/Layout").decode("utf-16-le"))
+        workbook_valid = {"Version", "DataModel", "Report/Layout"}.issubset(package_files)
+    except (
+        zipfile.BadZipFile,
+        FileNotFoundError,
+        KeyError,
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+    ):
         workbook_valid = False
-    add("dashboard", "tableau_workbook_valid_xml", workbook_valid, workbook.relative_to(root))
+        layout = {}
+    add("dashboard", "powerbi_package_valid", workbook_valid, workbook.relative_to(root))
     if workbook_valid:
-        tree = ElementTree.parse(workbook)
-        dashboard_names = {
-            element.attrib.get("name", "") for element in tree.findall("./dashboards/dashboard")
-        }
+        dashboard_names = {section.get("displayName", "") for section in layout["sections"]}
         expected_dashboards = {
             "Portfolio Overview",
             "Analyst Watchlist",
@@ -83,41 +89,27 @@ def validate_phase1_release() -> pd.DataFrame:
         }
         add(
             "dashboard",
-            "four_tableau_pages_defined",
+            "four_powerbi_pages_defined",
             dashboard_names == expected_dashboards,
             sorted(dashboard_names),
         )
-        connections = tree.findall(".//connection[@class='textscan']")
-        add(
-            "dashboard",
-            "tableau_connections_are_relative",
-            bool(connections)
-            and all(
-                not Path(item.attrib.get("directory", "")).is_absolute() for item in connections
-            ),
-            [item.attrib.get("directory", "") for item in connections],
-        )
+        add("dashboard", "powerbi_data_model_embedded", "DataModel" in package_files, "DataModel")
 
-    package = root / "dashboards" / "tableau" / "Corporate_Financial_Deterioration.twbx"
-    expected_package_files = {f"Data/{filename}" for filename in required_exports}
-    try:
-        with zipfile.ZipFile(package) as archive:
-            package_files = set(archive.namelist())
-            embedded_workbook_name = next(name for name in package_files if name.endswith(".twb"))
-            embedded_workbook = archive.read(embedded_workbook_name).decode("utf-8")
-        package_valid = expected_package_files.issubset(package_files)
-        package_private = "/Users/" not in embedded_workbook
-    except (zipfile.BadZipFile, FileNotFoundError, StopIteration, UnicodeDecodeError):
-        package_valid = False
-        package_private = False
+    screenshots = [
+        "Portfolio_Overview.png",
+        "Analyst_Watchlist.png",
+        "Company_Detail.png",
+        "Model_Performance.png",
+    ]
+    for filename in screenshots:
+        path = deliverables / filename
+        add("dashboard", f"{filename}_exists", path.is_file(), path.relative_to(root))
+    validation_notes = deliverables / "PowerBI_Validation_Notes.txt"
     add(
         "dashboard",
-        "tableau_package_contains_four_extracts",
-        package_valid,
-        package.relative_to(root),
-    )
-    add(
-        "privacy", "tableau_package_has_no_machine_path", package_private, package.relative_to(root)
+        "powerbi_validation_notes_present",
+        validation_notes.is_file(),
+        validation_notes.relative_to(root),
     )
 
     required_docs = [
@@ -165,7 +157,7 @@ def validate_phase1_release() -> pd.DataFrame:
     )
 
     publication_files = [root / filename for filename in required_docs]
-    publication_files += [root / "dashboards" / "tableau" / "README.md", workbook]
+    publication_files += [validation_notes]
     secret_pattern = re.compile(
         r"""(?ix)(
             fred_api_key\s*=\s*["']?[a-f0-9]{20,}
@@ -200,10 +192,16 @@ def run_stage_18() -> dict[str, Any]:
         root / "configs" / "selected_universe.yml",
         root / "configs" / "label.yml",
         root / "configs" / "modeling.yml",
-        root / "configs" / "tableau.yml",
+        root
+        / "outputs"
+        / "powerbi_stage17"
+        / "Corporate_Financial_Deterioration_PowerBI_Import.xlsx",
         root / "reports" / "generated" / "champion_selection_frozen.json",
-        root / "dashboards" / "tableau" / "Corporate_Financial_Deterioration.twb",
-        root / "dashboards" / "tableau" / "Corporate_Financial_Deterioration.twbx",
+        root
+        / "dashboards"
+        / "powerbi"
+        / "deliverables"
+        / "Corporate_Financial_Deterioration.pbix",
     ]
     payload = {
         "status": "complete",
