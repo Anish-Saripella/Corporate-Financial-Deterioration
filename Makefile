@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 PYTHON ?= python3
 
-.PHONY: help bootstrap install lock test lint format typecheck defs-check check dagster config-check clean reproduce-phase1 dashboard release-audit
+.PHONY: help bootstrap install lock test lint format typecheck defs-check check dagster config-check clean reproduce-phase1 reproduce-phase2-analysis dashboard release-audit
 
 help:
 	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z_-]+:.*## / {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -52,6 +52,15 @@ reproduce-phase1: check ## Rebuild Phase 1 from the certified local public-data 
 	.venv/bin/python -m cfd.cli run-stages-8-12
 	.venv/bin/python -m cfd.cli run-stages-13-16
 	.venv/bin/python -m cfd.cli run-stages-17-18
+
+reproduce-phase2-analysis: check ## Rebuild Phase 2 analysis from the certified local panel
+	.venv/bin/python -m cfd.cli run-phase2-development-models
+	.venv/bin/python -m cfd.cli analyze-phase2-development
+	.venv/bin/python -m cfd.cli run-phase2-forecasts
+	.venv/bin/python -m cfd.cli build-phase2-governance
+	.venv/bin/python -m cfd.cli run-phase2-horizon-sensitivity
+	.venv/bin/python -m cfd.cli write-phase2-research-report
+	.venv/bin/python scripts/generate_phase2_publication.py
 
 clean: ## Remove generated caches (preserves source data)
 	find . -type d -name __pycache__ -prune -exec rm -r {} +

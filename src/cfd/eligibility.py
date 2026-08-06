@@ -42,6 +42,10 @@ def audit_company_eligibility(
     minimum_coverage: float = 0.80,
     minimum_interest_expense: float = 1_000_000,
     minimum_interest_quarters: int = 12,
+    eligibility_mode: str = "strict_company",
+    minimum_interest_coverage_quarters: int = 16,
+    minimum_consecutive_interest_coverage_quarters: int = 8,
+    minimum_total_assets_quarters: int = 12,
 ) -> pd.DataFrame:
     """Apply prespecified, outcome-independent financial-history rules."""
 
@@ -69,14 +73,32 @@ def audit_company_eligibility(
         usable_quarters = int(usable.sum())
         consecutive = _maximum_consecutive_quarters(company, usable)
         reasons: list[str] = []
-        if usable_quarters < minimum_usable_quarters:
-            reasons.append("INSUFFICIENT_USABLE_QUARTERS")
-        if consecutive < minimum_consecutive_quarters:
-            reasons.append("INSUFFICIENT_CONSECUTIVE_QUARTERS")
-        if coverage < minimum_coverage:
-            reasons.append("INSUFFICIENT_CORE_FIELD_COVERAGE")
-        if interest_quarters < minimum_interest_quarters:
-            reasons.append("INSUFFICIENT_INTEREST_EXPENSE_HISTORY")
+        if eligibility_mode == "strict_company":
+            if usable_quarters < minimum_usable_quarters:
+                reasons.append("INSUFFICIENT_USABLE_QUARTERS")
+            if consecutive < minimum_consecutive_quarters:
+                reasons.append("INSUFFICIENT_CONSECUTIVE_QUARTERS")
+            if coverage < minimum_coverage:
+                reasons.append("INSUFFICIENT_CORE_FIELD_COVERAGE")
+            if interest_quarters < minimum_interest_quarters:
+                reasons.append("INSUFFICIENT_INTEREST_EXPENSE_HISTORY")
+        elif eligibility_mode == "company_quarter":
+            interest_valid = (
+                company["operating_income"].notna()
+                & company["interest_expense"].notna()
+                & (company["interest_expense"].abs() >= minimum_interest_expense)
+            )
+            interest_consecutive = _maximum_consecutive_quarters(company, interest_valid)
+            interest_quarters = int(interest_valid.sum())
+            asset_quarters = int(company["total_assets"].notna().sum())
+            if interest_quarters < minimum_interest_coverage_quarters:
+                reasons.append("INSUFFICIENT_INTEREST_COVERAGE_QUARTERS")
+            if interest_consecutive < minimum_consecutive_interest_coverage_quarters:
+                reasons.append("INSUFFICIENT_INTEREST_COVERAGE_CONTINUITY")
+            if asset_quarters < minimum_total_assets_quarters:
+                reasons.append("INSUFFICIENT_TOTAL_ASSETS_HISTORY")
+        else:
+            raise ValueError(f"Unknown eligibility mode: {eligibility_mode}")
         development = company.loc[company["fiscal_year"] <= 2023]
         rows.append(
             {
@@ -91,6 +113,10 @@ def audit_company_eligibility(
                 "maximum_consecutive_usable_quarters": consecutive,
                 "core_field_coverage": coverage,
                 "meaningful_interest_expense_quarters": interest_quarters,
+                "maximum_consecutive_interest_coverage_quarters": (
+                    interest_consecutive if eligibility_mode == "company_quarter" else pd.NA
+                ),
+                "eligibility_mode": eligibility_mode,
                 "median_total_assets": development["total_assets"].median(),
                 "median_revenue": development["revenue"].median(),
                 "eligible": not reasons,

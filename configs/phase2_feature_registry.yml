@@ -1,0 +1,66 @@
+version: phase2-interpretable-selected-features-v2
+availability_rule: decision_row_or_earlier_company_history_only
+preprocessing: fit_clipping_imputation_missing_indicators_and_scaling_inside_each_training_fold
+
+candidate_features:
+  core_condition:
+    - interest_coverage_ttm
+    - free_cash_flow_margin_ttm
+    - total_debt_to_assets
+    - operating_margin_ttm
+    - current_ratio
+    - cash_to_assets
+  understandable_operations_and_cash_flow:
+    - refinancing_gap_to_assets
+    - working_capital_to_assets
+    - capital_expenditure_to_revenue
+    - cash_flow_conversion
+    - revenue_growth_yoy
+    - asset_turnover
+    - net_income_margin_ttm
+  recent_change_and_peer_context:
+    - interest_coverage_ttm_yoy_change
+    - free_cash_flow_margin_ttm_yoy_change
+    - total_debt_to_assets_yoy_change
+    - interest_coverage_ttm_volatility_4q
+    - free_cash_flow_margin_ttm_volatility_4q
+    - total_debt_to_assets_volatility_4q
+    - interest_coverage_ttm_trend_4q
+    - free_cash_flow_margin_ttm_trend_4q
+    - total_debt_to_assets_trend_4q
+    - interest_coverage_ttm_sector_percentile
+    - free_cash_flow_margin_ttm_sector_percentile
+    - total_debt_to_assets_sector_percentile
+
+excluded_from_primary_classifier:
+  - filing_delay_days
+  - low_preferred_tag_share
+  - derived_fact_share
+  - source_quality_score
+  - forecast_features
+
+feature_selection:
+  financial_whitelist_required: true
+  outer_validation_outcomes_never_used: true
+  maximum_training_missing_rate: 0.60
+  remove_near_duplicate_spearman_correlation_above: 0.92
+  repeated_temporal_permutation_importance: true
+  permutation_repeats_per_inner_window: 5
+  minimum_positive_permutation_share: 0.67
+  minimum_features_per_fold: 8
+  maximum_features_per_fold: 18
+  protected_feature: interest_coverage_ttm
+  interpretation: predictive_relevance_not_causal_or_population_significance
+
+missing_data_policy:
+  occasional_historical_gaps: allowed
+  missing_indicators: added_by_fold_local_preprocessor
+  imputation: temporal_training_fold_median
+  future_label_window: must_contain_four_consecutive_fiscal_quarters
+
+data_quality_only_fields:
+  - filing_delay_days
+  - preferred_tag_share
+  - derived_fact_share
+  - source_quality_score
+  caveat: never_describe_reporting_delay_as_direct_evidence_of_deterioration

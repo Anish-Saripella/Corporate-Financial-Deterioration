@@ -1,0 +1,294 @@
+# ruff: noqa: E501
+"""Generate the integrated Phase 1 + Phase 2 research report."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import pandas as pd
+from docx import Document
+from generate_phase2_publication import (
+    AMBER,
+    GRAY,
+    NAVY,
+    add_table,
+    body,
+    bullet,
+    configure,
+    cover,
+    figure,
+    heading,
+)
+
+ROOT = Path(__file__).resolve().parents[1]
+GENERATED = ROOT / "reports" / "generated"
+PUBLICATION = ROOT / "reports" / "publication"
+FIGURES = ROOT / "reports" / "figures" / "combined_publication"
+OUTPUT = PUBLICATION / "Corporate_Financial_Deterioration_Combined_Phase1_Phase2_Research_Report.docx"
+
+
+def make_figures(horizon: pd.DataFrame) -> None:
+    FIGURES.mkdir(parents=True, exist_ok=True)
+
+    fig, ax = plt.subplots(figsize=(8.2, 3.8))
+    labels = ["Phase 1\nlocked holdout", "Phase 2\npartial pooling", "Phase 2\nboosting challenger"]
+    values = [0.397, 0.379378, 0.412197]
+    bars = ax.bar(labels, values, color=[f"#{GRAY}", f"#{NAVY}", f"#{AMBER}"])
+    ax.set_ylim(0, 0.50)
+    ax.set_ylabel("PR-AUC")
+    ax.set_title("Classification ranking evidence by research stage")
+    ax.grid(axis="y", alpha=0.2)
+    for bar, value in zip(bars, values, strict=True):
+        ax.text(bar.get_x() + bar.get_width() / 2, value + 0.012, f"{value:.3f}", ha="center", fontweight="bold")
+    ax.text(0.5, -0.24, "Evidence sets differ: Phase 1 is final holdout; Phase 2 is temporal development OOF.", transform=ax.transAxes, ha="center", fontsize=9, color=f"#{GRAY}")
+    fig.tight_layout()
+    fig.savefig(FIGURES / "performance_evidence.png", dpi=220, bbox_inches="tight")
+    plt.close(fig)
+
+    overall = horizon.loc[horizon["sector"].eq("Overall")].set_index("horizon_quarters")
+    fig, axes = plt.subplots(1, 3, figsize=(8.2, 3.7))
+    for ax, column, title in [
+        (axes[0], "PR_AUC", "PR-AUC"),
+        (axes[1], "precision_at_80pct_policy", "Precision"),
+        (axes[2], "median_warning_lead_quarters", "Median lead (quarters)"),
+    ]:
+        vals = [overall.loc[4, column], overall.loc[2, column]]
+        bars = ax.bar(["4Q", "2Q"], vals, color=[f"#{NAVY}", f"#{AMBER}"])
+        ax.set_title(title)
+        ax.grid(axis="y", alpha=0.2)
+        ax.set_ylim(0, max(vals) * 1.3)
+        for bar, value in zip(bars, vals, strict=True):
+            label = f"{value:.3f}" if title == "PR-AUC" else (f"{value:.1%}" if title == "Precision" else f"{value:.1f}")
+            ax.text(bar.get_x() + bar.get_width() / 2, value + max(vals) * 0.04, label, ha="center", fontsize=9)
+    fig.suptitle("Paired horizon sensitivity: shorter is not automatically better", fontweight="bold")
+    fig.tight_layout()
+    fig.savefig(FIGURES / "horizon_tradeoff.png", dpi=220)
+    plt.close(fig)
+
+
+def add_evidence_box(doc: Document) -> None:
+    add_table(
+        doc,
+        ["Evidence level", "Status", "Correct interpretation"],
+        [
+            ["1. Phase 1 final evaluation", "2023+ locked holdout opened once", "Final benchmark for the original 60-company experiment"],
+            ["2. Phase 2 model development", "Expanding-window OOF", "Model-selection and policy evidence; not a final future test"],
+            ["3. Two-quarter sensitivity", "Paired OOF experiment", "Tests a different warning horizon; does not replace the primary label"],
+            ["4. Post-2025 prospective test", "Unopened and outcome-immature", "Only this can support a new final generalization claim"],
+        ],
+        [2500, 2450, 4410],
+    )
+
+
+def build_report() -> Document:
+    horizon = pd.read_csv(GENERATED / "phase2_horizon_comparison.csv")
+    cases = pd.read_csv(GENERATED / "phase2_company_case_studies.csv")
+    recall_policy = pd.read_csv(GENERATED / "phase2_recall_first_threshold_table.csv")
+    make_figures(horizon)
+
+    doc = Document()
+    configure(doc, "Corporate Financial Deterioration | Integrated Phase 1 + Phase 2 Report")
+    doc.sections[0].footer.paragraphs[0].text = "Integrated research report | Evidence levels remain separate"
+    cover(
+        doc,
+        "Financial Risk & Data Science Research",
+        "Corporate Financial Deterioration Early-Warning Platform",
+        "Integrated Phase 1 and Phase 2 research report",
+    )
+
+    heading(doc, "Executive summary")
+    body(doc, "This project asks whether public SEC filings and historically available macroeconomic data can identify active U.S. companies whose debt-service capacity may deteriorate over the next four fiscal quarters. The product is a ranked review queue for analysts. It is not a bankruptcy model, credit rating, valuation model, or automated investment recommendation.")
+    body(doc, "What Phase 1 established. A point-in-time pipeline, financially interpretable deterioration label, time-series forecasts, and imbalanced classifier were tested on 60 active issuers. The frozen gradient-boosted model achieved 0.397 PR-AUC, 56.3% recall, 33.3% precision, 1.97x top-decile lift, and 0.159 Brier score on 457 locked 2023-and-later observations.", "What Phase 1 established. ")
+    body(doc, "What Phase 2 improved. The sample increased to 117 active issuers; eligibility permitted defensible optional-field gaps; feature selection moved inside temporal folds; the registered model became an interpretable partially pooled logistic specification; calibration, sector thresholds, clustered uncertainty, monitoring, and company-level explanations were added. The primary reached 0.379 development PR-AUC and the constrained boosting challenger reached 0.412. These are development estimates and cannot be treated as a new final test.", "What Phase 2 improved. ")
+    body(doc, "Decision conclusion. The project has achieved a credible research prototype for recall-first analyst triage. Four quarters should remain the primary horizon. Two quarters is useful only as a near-term secondary flag because it reduced workload but also reduced PR-AUC, precision, and warning lead. Definitive Phase 2 performance remains unresolved until the post-2025 prospective outcomes mature.", "Decision conclusion. ")
+    add_evidence_box(doc)
+
+    doc.add_page_break()
+    heading(doc, "1. Financial and business problem")
+    body(doc, "A credit, equity, or risk analyst cannot manually conduct a full filing, covenant, cash-flow, and management-quality review for every issuer each quarter. A screening model can reduce this search problem by ranking firms whose operating earnings may become insufficient relative to their interest burden. Because the model sits before manual analysis, the preferred error trade-off is recall-first: missing a true deterioration is considered more costly than reviewing a false alert.")
+    body(doc, "The outcome is deliberately narrower than default. A company is labeled as deteriorating when future interest coverage both falls below 1.5x and declines at least 40% from the current level. The level condition identifies a thin earnings cushion; the relative decline condition avoids labeling a small change from an already strong position. It does not encode covenant terms, maturity schedules, liquidity facilities, asset values, or recovery rates.")
+    add_table(doc, ["Stakeholder question", "Analytical output", "What still requires human judgment"], [
+        ["Which issuers deserve review first?", "Sector-aware probability and alert queue", "Material one-time items, strategy, regulation, covenant detail"],
+        ["Why was a company flagged?", "Observed KPI, trend, peer-position, and model reason codes", "Causal explanation and management intent"],
+        ["How uncertain is the outlook?", "Forecast ranges, calibration measures, and model stability", "Scenario severity and credit/investment action"],
+    ], [2700, 3000, 3660])
+
+    heading(doc, "2. SEC/FRED data architecture")
+    body(doc, "SEC EDGAR Company Facts supplies standardized XBRL statement facts, filing dates, fiscal periods, and amendments. FRED/ALFRED supplies interest-rate and business-cycle series with historical vintages. The architecture stores raw-response checksums and metadata, maps issuer-specific XBRL concepts into common financial fields, aligns company fiscal quarters, and then builds a company-quarter panel.")
+    bullet(doc, "Raw acquisition: authenticated SEC and FRED requests, retrieval timestamps, source URLs, checksums, and failure logs.")
+    bullet(doc, "Normalization: equivalent accounting tags are mapped to consistent economic concepts and validated for duration, units, sign, fiscal period, and duplicate filings.")
+    bullet(doc, "Point-in-time assembly: a fact or macro vintage enters a decision row only after it was publicly available.")
+    bullet(doc, "Analytical layers: KPIs, forecasts, features, labels, temporal folds, calibrated probabilities, sector thresholds, explanations, and monitoring tables.")
+    body(doc, "No synthetic data are used. Missing observations remain real missing observations until a fold-local model transformation handles them; the pipeline does not invent company histories.")
+
+    doc.add_page_break()
+    heading(doc, "3. Population, sector classification, and sampling")
+    body(doc, "The population is currently active U.S. public operating companies at the selection date. Delisted companies remain excluded because the defined research question concerns companies active today. This choice is consistent across phases, but it creates survivorship bias: findings cannot be generalized to the full historical population of failed or delisted issuers.")
+    heading(doc, "How a company is classified into a sector", 2)
+    body(doc, "Sector classification begins with the issuer's SEC Standard Industrial Classification code and a documented SIC-to-sector mapping. The mapping is then reviewed against the company's business description and dominant revenue activity. Classification follows the economic source of sales and cash flows—not a superficial label such as store format. Grocery-dominant discount retailers are therefore treated as Consumer Staples rather than Consumer Discretionary because essential food and household products dominate their economic exposure.")
+    add_table(doc, ["Design", "Phase 1", "Phase 2"], [
+        ["Selection / financial cutoffs", "Original frozen Phase 1 snapshot", "2 Aug 2026 / 31 Dec 2025"],
+        ["Sample", "30 Consumer + 30 Utilities", "75 Consumer + 42 Utilities"],
+        ["Randomization", "Seeded sector-stratified sample and prespecified replacement", "Random without replacement, seed 42, within eligible sector pools"],
+        ["Replacement", "14 firms replaced after strict certification", "Ranked reserves used only under the same eligibility-based, outcome-blind rules"],
+        ["Issuer status", "Active companies only", "Active companies only; delisted excluded"],
+        ["Synthetic observations", "None", "None"],
+    ], [1900, 3420, 4040])
+    body(doc, "Phase 2 ranks all mapped active candidates to create an auditable eligible pool, then applies seeded stratified random sampling without replacement. Randomization reduces researcher discretion; determinism means seed 42 reproduces the exact sample. The 42-company Utilities cap reflects the number that met the revised eligibility requirements. Increasing it to all mapped names would have admitted companies lacking sufficiently reliable core coverage for the defined analysis.")
+    heading(doc, "Eligibility change", 2)
+    body(doc, "Phase 1 required complete histories across several fields and lineage checks. Phase 2 keeps strong requirements for interest coverage, assets, quarterly continuity, filing lineage, and point-in-time availability, but allows occasional gaps in optional features such as free-cash-flow margin. This is appropriate because forecasting and classification pipelines can use incomplete histories, provided missingness is handled inside each training fold. It is not appropriate to relax the core outcome or timing fields, because the label and leakage controls would become unreliable.")
+
+    heading(doc, "4. Financial KPI definitions")
+    add_table(doc, ["KPI", "Definition", "Financial interpretation"], [
+        ["Interest coverage", "Trailing-12-month operating income / trailing-12-month interest expense", "Operating earnings available per dollar of interest burden; lower values mean less debt-service cushion"],
+        ["Free-cash-flow margin", "(TTM operating cash flow - TTM capital expenditure) / TTM revenue", "Cash retained after operating and investment needs relative to sales"],
+        ["Debt-to-assets", "Total debt / total assets", "Share of the asset base financed by interest-bearing debt; a balance-sheet leverage measure"],
+    ], [2000, 3500, 3860])
+    body(doc, "Ratios are complementary. Coverage focuses on earnings service capacity, free cash flow on internal funding resilience, and debt-to-assets on structural leverage. Sector context matters: negative free cash flow can be normal for capital-intensive Utilities, while a sharp deterioration from a company's own history may still be important.")
+
+    doc.add_page_break()
+    heading(doc, "5. Point-in-time controls and leakage prevention")
+    body(doc, "Financial prediction is especially vulnerable to look-ahead bias because a quarter-end date is not the same as the date investors could see the filing. The pipeline therefore associates each value with its public availability date and admits it only after that date. Amendments are handled through filing lineage rather than silently replacing the historical value with a later revision.")
+    add_table(doc, ["Leakage risk", "Control"], [
+        ["Using a filing before publication", "Filter SEC facts by filing availability date"],
+        ["Using revised macro history", "Join the FRED/ALFRED vintage available at the decision date"],
+        ["Training on outcomes not yet observable", "Embargo rows until the complete future label window has matured"],
+        ["Global imputation or scaling", "Fit missing-value treatment and transformations within each training fold"],
+        ["Selecting features on validation data", "Run feature selection only on the outer-fold training history"],
+        ["Randomly mixing past and future", "Use expanding-window validation ordered by time"],
+    ], [3350, 6010])
+    body(doc, "Out-of-fold (OOF) means that a prediction was generated by a model that did not train on that observation. Expanding-window validation trains on the past and validates on a later period, then expands the training window. This creates unseen periods without violating temporal order, which ordinary random k-fold cross-validation would do.")
+
+    heading(doc, "6. Phase 1 methodology and benchmark")
+    body(doc, "Phase 1 built the foundational end-to-end experiment: SEC/FRED ingestion, fiscal-quarter normalization, three central KPIs, company-history and sector-peer features, time-series forecasts, macroeconomic features, regularized logistic regression, and gradient boosting. Five forecast architectures were compared because the best time-series structure differs by KPI and horizon; persistence was treated as a mandatory baseline rather than assuming a complex model would win.")
+    body(doc, "Three expanding development windows were used for model selection. A 2023-and-later block then remained untouched until the champion and threshold were frozen. This is the strongest evidence level in the completed project because it approximates one prospective evaluation.")
+    add_table(doc, ["Phase 1 locked-holdout slice", "N", "PR-AUC", "Recall", "Precision", "Lift", "Brier"], [
+        ["Overall", "457", "0.397", "0.563", "0.333", "1.97x", "0.159"],
+        ["Consumer Discretionary", "228", "0.468", "0.610", "0.439", "2.18x", "0.171"],
+        ["Utilities", "229", "0.332", "0.486", "0.225", "2.15x", "0.147"],
+    ], [2600, 850, 1150, 1150, 1200, 1050, 1360])
+
+    heading(doc, "7. Phase 1 findings")
+    body(doc, "The classifier concentrated events in the high-risk queue, but performance differed materially by sector. Consumer Discretionary was easier to rank even though its median finances were stronger, because the sector contained wider cross-company dispersion and sharper cyclical transitions. Utilities had weaker median coverage, cash flow, and leverage, yet persistent low ratios and regulated capital structures made new transitions harder to distinguish.")
+    bullet(doc, "Consumer median KPIs: 5.25x coverage, 10.12% free-cash-flow margin, and 22.00% debt-to-assets.")
+    bullet(doc, "Utilities median KPIs: 1.81x coverage, -4.00% free-cash-flow margin, and 33.69% debt-to-assets.")
+    bullet(doc, "Forecast features improved the boosted development model in some settings but not consistently across folds or logistic regression; the finding was therefore only partially supported.")
+    bullet(doc, "Several four-quarter forecast intervals were too narrow. A forecast interval is a range intended to contain a stated share of future outcomes; recalibration widens or adjusts that range using prior forecast errors so observed coverage better matches the stated confidence level.")
+
+    heading(doc, "8. Phase 2 motivation and improvements")
+    body(doc, "Phase 2 responds directly to Phase 1's small issuer count, weaker Utility ranking, moderate precision, interval under-coverage, possible distribution shift, and limited model explanations. The objective was not simply to add algorithms. It was to make the analytical claim more defensible, the features easier to explain, and the review policy match the business preference for high recall.")
+    add_table(doc, ["Phase 1 limitation", "Phase 2 response"], [
+        ["60 active issuers", "Expanded to 117: 75 Consumer Discretionary and 42 Utilities"],
+        ["Strict optional-field completeness", "Core-label reliability retained; optional gaps allowed and handled within folds"],
+        ["Single pooled architecture", "Partially pooled primary, pooled benchmark, constrained boosting challenger"],
+        ["Moderate recall at frozen threshold", "Sector-specific thresholds minimize workload subject to at least 80% recall"],
+        ["Unstable or overly broad feature set", "Fold-local screening, correlation pruning, temporal permutation tests, and stability reporting"],
+        ["Forecast interval under-coverage", "Empirical recalibration by KPI, sector, and horizon"],
+        ["Limited case interpretation", "Reason codes, uncertainty flags, TP/FP/FN reviews, and analyst prompts"],
+    ], [3350, 6010])
+    body(doc, "Partially pooled means the model estimates a shared relationship for both sectors while allowing a small number of Utility-specific differences. It is a middle ground between one pooled model that assumes identical relationships and separate sector models that may be unstable with only 42 Utility issuers.")
+
+    heading(doc, "9. Feature selection and interpretability")
+    body(doc, "Candidate features were screened inside every outer training fold. The sequence checks missingness and variance, removes highly correlated duplicates, measures whether shuffling a feature repeatedly harms temporal validation performance, and retains variables only when the evidence is sufficiently stable. An ablation is a controlled comparison in which a feature or feature group is removed to determine whether it contributed useful predictive information.")
+    body(doc, "The stable four-quarter features were financially familiar: operating margin; current interest coverage; revenue growth; interest-coverage year-over-year change; interest-coverage volatility; sector-relative interest coverage; and sector-relative free-cash-flow margin. The latest fold also supported interest-coverage trend, cash-flow conversion, and the debt-to-assets trend. These describe profitability, debt-service capacity, direction, volatility, cash generation, leverage, and peer position.")
+    body(doc, "Obscure refinancing features were not forced into the final explanation. Refinancing gap/assets appeared in only one fold and was not stable. Filing delay was removed from the classifier and retained only as a data-quality and case-review field because a later filing can reflect many administrative causes and is not direct evidence of financial stress.")
+
+    heading(doc, "10. Model comparison and interpretability trade-off")
+    add_table(doc, ["Phase 2 model", "Role", "PR-AUC", "Recall*", "Precision*", "Brier"], [
+        ["Pooled logistic", "Linear benchmark", "0.367", "0.391", "0.415", "0.156"],
+        ["Partially pooled logistic", "Registered interpretable primary", "0.379", "0.391", "0.415", "0.157"],
+        ["Constrained boosting", "Nonlinear challenger", "0.412", "0.391", "0.415", "0.153"],
+    ], [2700, 2450, 1050, 1050, 1100, 1010])
+    body(doc, "*Recall and precision in this comparison use a common 20% alert-rate reference, so ranking and probability quality are compared under the same workload. The operational policy below uses different thresholds to satisfy the recall-first goal.")
+    body(doc, "Testing all three architectures was necessary to answer separate questions. The pooled logistic model tests whether sector deviations add value. The partially pooled model tests the planned hierarchical idea in an interpretable form. Boosting tests whether important nonlinear thresholds and interactions are being missed. The boosting challenger ranked better, but the partially pooled logistic model remains the registered primary because the project prioritizes explainability and defensible financial relationships. The challenger should remain visible rather than being discarded.")
+    figure(doc, FIGURES / "performance_evidence.png", "Figure 1. Performance estimates are shown together for orientation, but the evidence sets are not directly interchangeable.")
+
+    doc.add_page_break()
+    heading(doc, "11. Recall-first screening policy")
+    policy = recall_policy.loc[recall_policy["required_recall"].eq(0.8)].iloc[0]
+    body(doc, f"The operating rule first requires at least 80% recall in each sector and then selects the thresholds that produce the smallest review queue. On the complete Phase 2 development OOF predictions, this produced {policy['overall_recall']:.1%} overall recall, {policy['consumer_recall']:.1%} Consumer recall, {policy['utility_recall']:.1%} Utility recall, {policy['precision']:.1%} precision, and a {policy['alert_rate']:.1%} alert rate.")
+    body(doc, "Consumer and Utility precision or recall are not forced to be equal. Each sector receives its own threshold because base rates, financial structure, and score distributions differ. The minimum recall standard is shared; the achieved values may differ. The high alert rate is a real operating cost, but it follows directly from the stated preference to avoid missed deteriorations in a pre-review tool.")
+    body(doc, "Precision is the share of alerts that satisfy the exact future label. A false positive may still be a useful financially weak-company review, but it consumes capacity and must not be relabeled as a successful prediction. Recall is the share of actual deterioration rows that were alerted.")
+
+    heading(doc, "12. Two-quarter versus four-quarter sensitivity")
+    overall = horizon.loc[horizon["sector"].eq("Overall")].set_index("horizon_quarters")
+    add_table(doc, ["Paired OOF result", "4-quarter primary", "2-quarter sensitivity"], [
+        ["Rows", "397", "397"],
+        ["Event prevalence", f"{overall.loc[4, 'event_prevalence']:.1%}", f"{overall.loc[2, 'event_prevalence']:.1%}"],
+        ["PR-AUC", f"{overall.loc[4, 'PR_AUC']:.3f}", f"{overall.loc[2, 'PR_AUC']:.3f}"],
+        ["Recall", f"{overall.loc[4, 'recall_at_80pct_policy']:.1%}", f"{overall.loc[2, 'recall_at_80pct_policy']:.1%}"],
+        ["Precision", f"{overall.loc[4, 'precision_at_80pct_policy']:.1%}", f"{overall.loc[2, 'precision_at_80pct_policy']:.1%}"],
+        ["Alert rate", f"{overall.loc[4, 'alert_rate_at_80pct_policy']:.1%}", f"{overall.loc[2, 'alert_rate_at_80pct_policy']:.1%}"],
+        ["Brier score", f"{overall.loc[4, 'Brier_score']:.3f}", f"{overall.loc[2, 'Brier_score']:.3f}"],
+        ["Median warning lead", f"{overall.loc[4, 'median_warning_lead_quarters']:.1f} quarters", f"{overall.loc[2, 'median_warning_lead_quarters']:.1f} quarters"],
+    ], [3600, 2880, 2880])
+    figure(doc, FIGURES / "horizon_tradeoff.png", "Figure 2. The two-quarter label reduces queue size but loses ranking quality, precision, and warning time.")
+    body(doc, "The two-quarter model retained high recall and lowered the alert rate from 67.3% to 58.9%, but PR-AUC fell by 0.090, precision fell by 6.6 percentage points, and median warning lead fell from two quarters to one. Company-clustered confidence intervals excluded zero for the PR-AUC, precision, and alert-rate changes. The lower two-quarter Brier score partly reflects its lower event prevalence and is not proof of better ranking. Four quarters therefore remains primary; two quarters can be displayed as an optional near-term sensitivity flag.")
+
+    heading(doc, "13. Company-level case studies")
+    for _, case in cases.iterrows():
+        label = {"true_positive": "True positive", "false_positive": "False positive", "false_negative": "Missed deterioration"}.get(case["case_type"], str(case["case_type"]).replace("_", " ").title())
+        heading(doc, f"{label}: {case['company_name']} ({case['ticker']})", 2)
+        body(doc, f"Decision date {pd.Timestamp(case['decision_at']).date()}. Model probability {case['probability']:.1%}; sector threshold {case['sector_threshold']:.1%}. Interest coverage {case['interest_coverage_ttm']:.2f}x, free-cash-flow margin {case['free_cash_flow_margin_ttm']:.1%}, operating margin {case['operating_margin_ttm']:.1%}, and debt-to-assets {case['total_debt_to_assets']:.1%}.")
+        body(doc, str(case["result_explanation"]))
+    body(doc, "The three cases show why the model should support—not replace—analysis. Designer Brands demonstrates early signal value. Under Armour shows how severe current weakness can trigger a reasonable precautionary review without satisfying the exact future transition rule. NRG shows that a later deterioration may be missed when contemporaneous ratios do not yet reveal the change.")
+
+    heading(doc, "14. Phase 1-to-Phase 2 performance comparison")
+    body(doc, "Phase 2 did not establish a conclusive performance improvement over Phase 1 because the numbers come from different populations and evidence levels. Phase 1's 0.397 PR-AUC is a one-time final holdout result. Phase 2's 0.379 primary and 0.412 challenger are development OOF estimates after expanding the population and changing the modeling procedure. The challenger exceeds the numerical Phase 1 benchmark, while the interpretable primary is slightly lower, but neither comparison is a valid replacement for the unopened prospective test.")
+    add_table(doc, ["Dimension", "Phase 1", "Phase 2", "Assessment"], [
+        ["Issuer coverage", "60", "117", "Improved breadth within the same two-sector active-company scope"],
+        ["Final evidence", "Locked 2023+ holdout evaluated", "Post-2025 test unopened", "Phase 2 final generalization unresolved"],
+        ["Primary PR-AUC", "0.397 holdout", "0.379 development OOF", "No defensible claim of decline or improvement"],
+        ["Best challenger PR-AUC", "0.397 holdout champion", "0.412 development OOF", "Promising, pending final test"],
+        ["Decision policy", "Frozen general threshold; 56.3% recall", "Sector thresholds; >=80% recall target", "More aligned with analyst-screening objective, with higher workload"],
+        ["Interpretability/governance", "Feature increments and model card", "Fold-local selection, partial pooling, calibration, uncertainty, cases, monitoring", "Material methodological improvement"],
+    ], [1900, 2100, 2200, 3160])
+
+    heading(doc, "15. Limitations and governance")
+    bullet(doc, "Survivorship bias: active-company-only sampling excludes delisted and failed issuers, so this is not a default-population study.")
+    bullet(doc, "Sector scope: two sectors do not establish generalization to Industrials, Healthcare, Energy, Financials, or international firms.")
+    bullet(doc, "Utility sample and event counts are smaller; sector results carry greater uncertainty and weaker precision.")
+    bullet(doc, "The interest-coverage label captures one financially meaningful deterioration pattern, not every form of distress.")
+    bullet(doc, "Overlapping future windows make company-quarter rows correlated; company-clustered resampling helps but does not create more independent issuers.")
+    bullet(doc, "Public XBRL facts contain tag heterogeneity, amendments, missing fields, and measurement noise despite normalization controls.")
+    bullet(doc, "Model explanations identify predictive associations, not causes. They cannot substitute for filing, covenant, liquidity, regulatory, and management review.")
+    bullet(doc, "The recall-first policy creates a large review queue. Capacity, review outcomes, and alert fatigue should be monitored prospectively.")
+    body(doc, "Governance requires versioned configurations, deterministic seeds, source lineage, audit tables, model/data cards, automated leakage tests, frozen thresholds, monitoring for population and calibration drift, and clear statements of evidence level. Credentials remain in the ignored environment file; no secret keys or raw proprietary data belong in published artifacts.")
+
+    heading(doc, "16. Prospective test plan")
+    body(doc, "The next decisive step is not further tuning on the existing outcomes. The current two-sector Phase 2 specification, feature rules, calibration procedure, and sector thresholds should be frozen. Company quarters after the 31 December 2025 financial cutoff should remain unexamined until their complete four-quarter outcomes are available.")
+    bullet(doc, "Primary endpoint: four-quarter PR-AUC, with Phase 1's 0.397 benchmark treated as historical context rather than a guaranteed target.")
+    bullet(doc, "Operating endpoints: overall and sector recall, precision, alert rate, distinct episode capture, and warning lead.")
+    bullet(doc, "Probability endpoints: Brier score, calibration plots, expected calibration error, and forecast-interval coverage by KPI, sector, and horizon.")
+    bullet(doc, "Uncertainty: company-clustered intervals and results by time period, sector, and issuer concentration.")
+    bullet(doc, "Release rule: report all prespecified results once, including unfavorable results; do not retune thresholds after opening the test.")
+    bullet(doc, "Extension rule: a third sector should be a separately documented research extension after the two-sector baseline is frozen, with a valid taxonomy and adequate issuer/event coverage.")
+
+    heading(doc, "17. Final conclusions")
+    body(doc, "The project achieved its Phase 1 goal: a reproducible, point-in-time financial deterioration prototype with a legitimate locked-holdout benchmark. It also achieved the implementation goals of Phase 2: broader sampling, more defensible missing-data eligibility, interpretable partial pooling, fold-local feature selection, empirical forecast-interval recalibration, recall-first sector thresholds, uncertainty estimates, monitoring, horizon sensitivity, and company cases.")
+    body(doc, "The project has not yet achieved a definitive Phase 2 future-performance result. The current evidence supports a controlled analyst-augmentation use case and a strong financial data-science portfolio demonstration, not autonomous credit decisions. The most defensible operating design is a four-quarter medium-term primary screen, an optional two-quarter near-term flag, transparent reason codes, and mandatory manual review.")
+    body(doc, "The primary contribution is the integration of financial meaning with experimental discipline: accounting normalization, point-in-time availability, temporal validation, imbalanced learning, calibration, feature stability, interpretable model structure, and explicit governance. That integration is more valuable than presenting one algorithm or one score in isolation.")
+
+    heading(doc, "Appendix A. Reproducibility and evidence map")
+    add_table(doc, ["Artifact", "Role"], [
+        ["README.md", "Project status, Phase 1 benchmark, limitations, and Phase 2 design"],
+        ["configs/phase2.yml", "Frozen Phase 2 population, seed, model, horizon, and threshold policy"],
+        ["docs/point_in_time_policy.md", "Availability and leakage rules"],
+        ["docs/phase2_methodology.md", "Plain-language Phase 2 technical definitions"],
+        ["reports/generated/phase2_*.csv", "Auditable metrics, thresholds, feature evidence, cases, monitoring, and sensitivity results"],
+        ["reports/publication/*Phase1* and *Phase2*", "Phase-specific published research records"],
+        ["tests/", "Sampling, transformation, temporal, leakage, model, and reporting checks"],
+    ], [3600, 5760])
+    return doc
+
+
+def main() -> None:
+    PUBLICATION.mkdir(parents=True, exist_ok=True)
+    doc = build_report()
+    doc.save(OUTPUT)
+    print(OUTPUT)
+
+
+if __name__ == "__main__":
+    main()

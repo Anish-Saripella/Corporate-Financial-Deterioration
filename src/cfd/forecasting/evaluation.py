@@ -52,6 +52,14 @@ def build_forecast_backtest(
                         if target_position >= len(company):
                             continue
                         target = company.iloc[target_position]
+                        origin_fiscal_position = int(origin["fiscal_year"]) * 4 + int(
+                            origin["fiscal_quarter_number"]
+                        )
+                        target_fiscal_position = int(target["fiscal_year"]) * 4 + int(
+                            target["fiscal_quarter_number"]
+                        )
+                        if target_fiscal_position - origin_fiscal_position != horizon:
+                            continue
                         actual = target[kpi]
                         if pd.isna(actual):
                             continue

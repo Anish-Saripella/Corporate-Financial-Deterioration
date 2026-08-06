@@ -1,0 +1,159 @@
+version: phase2-development-v1
+status: development_only
+
+# Phase 2 deliberately does not name a final test date yet. Set this once the
+# expanded panel has enough matured labels beyond the consumed 2023+ benchmark.
+evaluation_policy:
+  consumed_benchmark_start: 2023-01-01
+  untouched_test_start: null
+  require_expanded_universe: true
+  active_issuers_only: true
+  delisted_issuers_excluded: true
+  target_issuers_by_sector:
+    Consumer Discretionary: 75
+    Utilities: 42
+  minimum_issuers_per_sector: 42
+  minimum_episodes_per_sector: 150
+  embargo_quarters: 6
+  minimum_outer_training_quarters: 36
+  validation_window_quarters: 4
+  step_quarters: 4
+
+label_sensitivity:
+  benchmark:
+    horizon_quarters: 4
+    coverage_multiple: 1.5
+    relative_coverage_decline: 0.40
+  registered_horizons_quarters: [2, 4, 6]
+  registered_coverage_multiples: [1.0, 1.5, 2.0]
+  # These are sensitivity analyses, not candidate labels selected by PR-AUC.
+  multi_kpi_components:
+    - debt_service_weakness
+    - negative_free_cash_flow
+    - rising_leverage
+  multi_kpi_rule:
+    components_required: 2
+    negative_fcf_margin_threshold: 0.0
+    leverage_increase_threshold: 0.10
+
+modeling:
+  candidates:
+    - regularized_logistic
+    - constrained_gradient_boosting
+    - pooled_sector_interactions
+  sector_architectures:
+    - pooled
+    - partially_pooled_primary
+    - pooled_sector_calibration_when_estimable
+  calibration_methods: [none, intercept, platt, isotonic]
+  nested_validation: true
+  primary_metric: PR_AUC
+  logistic_c_grid: [0.10, 0.50, 1.00]
+  class_weight_multipliers: [1.0, 2.0, 5.0]
+  boosting_candidates:
+    - {n_estimators: 150, max_depth: 2, learning_rate: 0.05, positive_class_weight: 1.0}
+    - {n_estimators: 250, max_depth: 2, learning_rate: 0.03, positive_class_weight: 2.0}
+    - {n_estimators: 200, max_depth: 3, learning_rate: 0.04, positive_class_weight: 2.0}
+  inner_validation_windows: 3
+  inner_validation_window_quarters: 4
+  minimum_inner_training_quarters: 24
+  sector_interaction_features:
+    - interest_coverage_ttm
+    - free_cash_flow_margin_ttm
+    - total_debt_to_assets
+    - refinancing_gap_to_assets
+    - capital_expenditure_to_revenue
+  selection_tiebreakers:
+    - Brier_score
+    - sector_stability
+    - temporal_stability
+    - interpretability
+    - simplicity
+  feature_selection:
+    protected_core_features:
+      - interest_coverage_ttm
+    maximum_missing_rate: 0.60
+    maximum_absolute_correlation: 0.92
+    permutation_repeats: 5
+    minimum_positive_window_share: 0.67
+    minimum_features: 8
+    maximum_features: 18
+    random_seed: 20260802
+
+decision_policy:
+  review_fractions: [0.05, 0.10, 0.20, 0.40, 0.60]
+  missed_event_cost: 5.0
+  unnecessary_review_cost: 1.0
+  correct_alert_benefit: 1.0
+  target_recall_within_each_sector: 0.80
+  recall_sensitivity_targets: [0.60, 0.70, 0.80, 0.90]
+  threshold_scope: sector_specific
+  selection_rule: minimize_alert_workload_subject_to_recall_in_each_sector
+  evaluation_reference_alert_rate: 0.20
+  maximum_alert_rate: null
+
+uncertainty:
+  cluster_column: cik
+  bootstrap_repetitions: 500
+  confidence_level: 0.95
+  random_seed: 20260805
+
+interpretability:
+  maximum_reason_codes: 4
+  explicitly_non_causal: true
+
+monitoring:
+  population_stability_warning: 0.10
+  population_stability_escalation: 0.25
+  missingness_increase_warning: 0.05
+  calibration_error_warning: 0.10
+  alert_rate_upper: 0.25
+  actions:
+    source_freshness_failure: stop_scoring_and_investigate
+    feature_drift_warning: investigate_before_retraining
+    calibration_failure: recalibrate_on_matured_labels
+    ranking_failure: reconsider_features_and_model
+
+universe_policy:
+  selection_as_of: 2026-08-02
+  financial_history_cutoff: 2025-12-31
+  sectors: [Consumer Discretionary, Utilities]
+  target_count_by_sector:
+    Consumer Discretionary: 75
+    Utilities: 42
+  target_rationale: larger_unbalanced_sample_with_equal_sector_model_weighting
+  population: currently_listed_us_operating_companies
+  sampling_method: stratified_random_without_replacement
+  random_seed: 42
+  strata: [sector, broad_industry, filing_based_size_tier]
+  size_proxy: median_total_assets_development_period
+  size_tie_breaker: median_revenue_development_period
+  size_tiers: 3
+  reserve_order_required: true
+  candidate_pool: all_mapped_active_candidates
+  eligibility_rules:
+    minimum_interest_coverage_quarters: 16
+    minimum_consecutive_interest_coverage_quarters: 8
+    minimum_total_assets_quarters: 12
+    minimum_meaningful_interest_expense: 1000000
+    occasional_nonlabel_history_gaps_allowed: true
+  eligibility_before_final_sampling: true
+  replacement_order: frozen_same_sector_reserve_order
+  exclusions:
+    delisted_companies: true
+    funds_and_etfs: true
+    spacs_and_shells: true
+    banks_and_insurers: true
+    foreign_private_issuers: true
+    unusable_xbrl_histories: true
+  outcome_aware_resampling_allowed: false
+  model_performance_aware_replacement_allowed: false
+  survivorship_bias_accepted: true
+  final_certification_treatment:
+    policy: replace_when_certified_reserve_available_then_retain_flagged_shortfall
+    all_three_kpis_company_exclusion_gate: false
+    strict_phase1_certification_retained_as_quality_tier: true
+    row_level_modeling_eligibility: true
+    fold_local_imputation_and_missing_indicators: true
+    kpi_specific_forecast_eligibility: true
+    report_performance_by_quality_tier: true

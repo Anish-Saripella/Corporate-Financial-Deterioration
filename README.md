@@ -55,7 +55,8 @@ Network ingestion is deliberately separate from local validation. Add real crede
 - `docs/`: charter, point-in-time policy, decisions, validation plan, and data dictionaries.
 - `data/`: ignored raw/intermediate/processed data with committed directory placeholders.
 - `dashboards/powerbi/`: optional Power BI prototype and validation evidence retained for reference.
-- `reports/publication/`: publication-style Phase 1 research report in Word and PDF.
+- `reports/publication/`: publication-style Phase 1 and Phase 2 reports and the concise portfolio
+  case study in Word and PDF.
 
 ## Reproducibility policy
 
@@ -63,6 +64,23 @@ Generated data and model artifacts are not committed. Each acquisition writes a 
 source URL, parameters, retrieval timestamp, checksum, and software version. Configurations,
 schemas, transformations, tests, and small fixtures are committed. See
 [`docs/reproducibility.md`](docs/reproducibility.md).
+
+## Reproduce Phase 2
+
+Phase 2 uses the frozen active-company sample and certified point-in-time panel. Once those local,
+non-committed data artifacts exist, reproduce the complete analysis with:
+
+```bash
+make reproduce-phase2-analysis
+```
+
+The final command rebuilds the two-versus-four-quarter sensitivity analysis, company cases,
+research report, and recruiter-facing case study. See
+[`docs/phase2_reproducibility.md`](docs/phase2_reproducibility.md) for the ordered acquisition
+stages, expected outputs, source attribution, and credential/data-publication restrictions.
+
+Phase 2 remains development evidence. Its post-2025 final future test must remain unopened until
+the four-quarter outcomes have matured.
 
 ## What has been completed
 
@@ -167,17 +185,17 @@ policy are frozen.
 
 | Audit finding | Why it matters | Phase 2 response |
 |---|---|---|
-| Only 60 currently listed issuers | The sample excludes delisted firms and contains only 30 independent companies per sector, even though it has many quarterly rows. This limits generalization and understates severe distress. | Add delisted, acquired, bankrupt, and financially distressed histories; expand the number of issuers before increasing model complexity. |
+| Only 60 currently listed issuers | The sample contains only 30 independent companies per sector, even though it has many quarterly rows. | Expand to 75 Consumer Discretionary and 42 Utility issuers using reliable-interest-coverage and company-quarter eligibility. Delisted firms remain outside scope. |
 | Repeated and overlapping observations | Adjacent four-quarter labels share future quarters, so 3,150 rows are not 3,150 independent experiments. | Report company- and episode-level results; use issuer-clustered uncertainty estimates and embargoed temporal validation. |
 | One researcher-defined outcome | The 1.5x/40% coverage rule is interpretable but does not capture every form of financial deterioration. | Pre-register sensitivity tests for alternative thresholds, horizons, cash-flow stress, covenant-like pressure, and time-to-event outcomes. Do not select a label merely because it improves model metrics. |
-| Survivorship and sector scope | Results from two sectors of surviving public firms cannot represent the broader corporate-credit population. | Correct survivorship bias first, then add sectors in economically coherent groups with separate reporting. |
+| Survivorship and sector scope | Results from two sectors of surviving public firms cannot represent the broader corporate-credit population. | Retain the active-company population, use 75 Consumer and 42 Utility issuers, and keep claims limited to surviving public issuers. |
 | Utility classification is weaker | Utility holdout PR-AUC was 0.332 and precision was 0.225, versus 0.468 and 0.439 for Consumer Discretionary. | Diagnose label suitability, feature coverage, rate-regulation effects, capital-spending cycles, and sector calibration before choosing a separate model. |
 | Moderate overall alert precision | Approximately one in three Phase 1 alerts became an event under the study definition. | Add cost-sensitive threshold selection, review-capacity analysis, and features that distinguish temporary weakness from sustained deterioration. |
 | Distribution shift | The holdout alert rate exceeded the development design range and performance varied by temporal fold. | Add rolling-origin backtests, regime features, drift monitoring, and a new untouched future test period. |
 | Forecast intervals under-covered | Several four-quarter ranges were too narrow, making forecast uncertainty appear more reliable than it was. | Recalibrate intervals by KPI, sector, and horizon; test conformal or empirical residual intervals. |
 | Forecast features gave mixed benefits | Forecasts helped the boosted model in some development tests but not every fold or the logistic model. | Run an ablation test against current and historical ratios; retain forecasts only if improvement is stable and worth the added complexity. |
 | Probability quality varies by sector | A lower Brier score did not guarantee stronger ranking, and Utility calibration error remained material. | Evaluate discrimination and calibration separately; test sector-specific probability recalibration using training data only. |
-| Limited model comparison | Phase 1 appropriately emphasized logistic regression and constrained gradient boosting, but did not exhaust panel or time-to-event approaches. | Add interpretable panel, discrete-time hazard, and survival challengers before considering complex sequence models. |
+| Limited model comparison | Phase 1 appropriately emphasized logistic regression and constrained gradient boosting. | Compare the partially pooled logistic primary, pooled logistic benchmark, and constrained pooled gradient-boosting challenger. |
 | No decision-cost validation | A statistical improvement may not improve an analyst's workload or financial decisions. | Define the cost of missed events and false alerts; compare top-5%, top-10%, and top-20% review queues using decision curves and expected value. |
 
 ### Should Phase 2 train separate sector models?
@@ -196,23 +214,19 @@ The recommended comparison is:
 2. A partially pooled or hierarchical model that learns common relationships while allowing some
    coefficients or baselines to differ by sector.
 3. A pooled classifier with sector-specific probability calibration and alert thresholds.
-4. Fully separate sector models as challengers.
 
-The fully separate models should be promoted only if they improve repeated future-period PR-AUC,
-precision, calibration, and stability by more than the uncertainty around those differences. A
-useful planning target is at least 75–100 issuers and 150–200 distinct deterioration episodes per
-sector, including unsuccessful and delisted firms. This is a planning range, not a universal
-statistical rule. Learning curves and issuer-clustered confidence intervals should determine
-whether the final sample is sufficient.
+Fully separate models are removed from the revised scope. The real audit supports 75 Consumer and
+42 Utility issuers. Equal sector training weight prevents the larger Consumer sample from
+dominating, while evaluation remains unweighted and sector-specific.
 
 ### Phase 2 implementation workstreams
 
-#### 1. Expand and strengthen the dataset
+#### 1. Expand and strengthen the active-company dataset
 
-- Add delisted, bankrupt, acquired, and financially distressed issuers without using later outcomes
-  to decide inclusion.
-- Increase issuer and distinct-event counts in both existing sectors before fitting independent
-  sector models.
+- Increase the sample to 75 Consumer and 42 Utility companies using reliable interest coverage,
+  seeded stratified sampling, and company-quarter modeling eligibility.
+- Continue excluding delisted issuers under the confirmed research scope. Treat survivorship bias
+  as an accepted limitation and do not generalize results to historical failures or defaults.
 - Preserve filing dates, amended filings, macro vintages, and source lineage under the existing
   point-in-time policy.
 - Add sectors only after establishing a valid sector taxonomy, adequate issuer coverage, and an
@@ -226,14 +240,12 @@ whether the final sample is sufficient.
 - Pre-register alternative coverage thresholds and two-, four-, and six-quarter horizons.
 - Test a multi-KPI outcome that combines debt-service weakness, cash-flow stress, and rising
   leverage, while avoiding a label so complex that it becomes difficult to explain.
-- Evaluate discrete-time survival analysis so the model estimates when deterioration may occur and
-  properly handles observations whose future outcomes are not yet known.
 - Score performance by distinct deterioration episode as well as by company-quarter.
 
 #### 3. Add financially motivated predictors
 
-- Debt structure: debt maturity pressure, short-term debt share, refinancing need, interest-expense
-  growth, fixed-charge burden, and debt issuance or repayment.
+- Keep refinancing gap/assets as an understandable candidate only until leakage-safe temporal
+  feature selection determines whether it adds stable value.
 - Liquidity and cash flow: cash reserves, current-ratio trend, working-capital requirements,
   operating-cash-flow conversion, capital-expenditure burden, and dividend coverage.
 - Operating performance: revenue growth, margin trend, earnings volatility, asset turnover, and
@@ -261,8 +273,8 @@ whether the final sample is sufficient.
 #### 5. Improve classifier performance
 
 - Use nested expanding-window validation for hyperparameter and feature selection.
-- Compare regularized logistic regression, constrained gradient boosting, partially pooled sector
-  models, discrete-time hazard models, and carefully controlled panel approaches.
+- Compare the partially pooled logistic primary model, pooled logistic benchmark, and constrained
+  pooled gradient-boosting challenger.
 - Test class weighting and focal or cost-sensitive objectives; avoid naive row oversampling that
   duplicates correlated quarterly observations and distorts event prevalence.
 - Tune the alert policy separately from probability estimation.
@@ -273,8 +285,8 @@ whether the final sample is sufficient.
 
 #### 6. Improve calibration and sector treatment
 
-- Compare pooled, partially pooled, sector-calibrated, and fully separate models using the same
-  folds, features, and evaluation periods.
+- Compare pooled and partially pooled models using the same folds; estimate sector calibration only
+  when earlier calibration rows contain both outcome classes.
 - Test Platt scaling, isotonic calibration, and intercept-only recalibration using training-period
   predictions only.
 - Produce reliability charts, calibration error, and Brier decomposition by sector, time period,
@@ -308,15 +320,18 @@ whether the final sample is sufficient.
 ### Recommended execution order
 
 1. Freeze the Phase 1 release and register the 2023+ holdout as a consumed benchmark.
-2. Expand the issuer universe and recover delisted/distressed histories.
+2. Expand the universe to 75 Consumer Discretionary and 42 Utility issuers using company-quarter
+   eligibility while preserving strict point-in-time controls.
 3. Rebuild the point-in-time panel and audit new data quality.
 4. Pre-register outcome sensitivity tests and a new untouched evaluation period.
 5. Establish refreshed naive, logistic, and Phase 1-equivalent baselines.
 6. Run feature and forecasting ablations using nested temporal validation.
-7. Compare pooled, partially pooled, sector-calibrated, and separate-sector models.
+7. Compare the partially pooled primary, pooled benchmark, and constrained boosting challenger.
 8. Select probability calibration and alert thresholds using development data only.
-9. Freeze the complete Phase 2 design and evaluate once on the new test period.
-10. Conduct shadow monitoring and publish the Phase 2 model card, data card, and research update.
+9. Generate company explanations, drift monitoring, a model/data card, and the development research
+   report with `build-phase2-governance` and `write-phase2-research-report`.
+10. Freeze the complete Phase 2 design and evaluate once on the new test period.
+11. Conduct prospective shadow monitoring before making an operational-usefulness claim.
 
 ### Phase 2 acceptance criteria
 

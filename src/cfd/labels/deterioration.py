@@ -6,6 +6,17 @@ import numpy as np
 import pandas as pd
 
 
+def _quarter_positions(group: pd.DataFrame, time_column: str) -> pd.Series:
+    if {"fiscal_year", "fiscal_quarter_number"}.issubset(group.columns):
+        return group["fiscal_year"].astype(int) * 4 + group["fiscal_quarter_number"].astype(int)
+    return pd.to_datetime(group[time_column]).dt.to_period("Q").astype("int64")
+
+
+def _continuous_future_window(positions: pd.Series, position: int, horizon: int) -> bool:
+    window = positions.iloc[position : position + horizon + 1].to_numpy(dtype=int)
+    return len(window) == horizon + 1 and bool((np.diff(window) == 1).all())
+
+
 def make_deterioration_label(
     frame: pd.DataFrame,
     *,
@@ -29,10 +40,17 @@ def make_deterioration_label(
     labels = pd.Series(pd.NA, index=frame.index, dtype="Int8")
     for _, group in ordered.groupby(entity_column, sort=False):
         coverage = group[coverage_column].astype(float)
+        positions = _quarter_positions(group, time_column)
         for position, index in enumerate(group.index):
             future = coverage.iloc[position + 1 : position + horizon + 1]
             current = coverage.iloc[position]
-            if len(future) < horizon or pd.isna(current) or current == 0 or future.isna().any():
+            if (
+                len(future) < horizon
+                or not _continuous_future_window(positions, position, horizon)
+                or pd.isna(current)
+                or current == 0
+                or future.isna().any()
+            ):
                 continue
             future_minimum = float(future.min())
             relative_change = (current - future_minimum) / max(abs(current), np.finfo(float).eps)
@@ -74,14 +92,16 @@ def deterioration_diagnostics(
     for _, group in ordered.groupby(entity_column, sort=False):
         episode_positions: list[int] = []
         coverage = group[coverage_column].astype(float)
+        positions = _quarter_positions(group, time_column)
         for position, index in enumerate(group.index):
             future = coverage.iloc[position + 1 : position + horizon + 1]
-            if len(future) == horizon:
+            continuous = _continuous_future_window(positions, position, horizon)
+            if len(future) == horizon and continuous:
                 result.loc[index, "label_available_at"] = group["decision_at"].iloc[
                     position + horizon
                 ]
             current = coverage.iloc[position]
-            if len(future) < horizon or pd.isna(current) or future.isna().any():
+            if len(future) < horizon or not continuous or pd.isna(current) or future.isna().any():
                 continue
             future_minimum = float(future.min())
             decline = (current - future_minimum) / max(abs(current), np.finfo(float).eps)

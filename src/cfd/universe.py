@@ -233,17 +233,19 @@ def assign_size_tiers(eligible: pd.DataFrame) -> pd.DataFrame:
 def select_final_universe(
     eligible: pd.DataFrame,
     *,
-    per_sector: int,
+    per_sector: int | dict[str, int],
     seed: int,
 ) -> pd.DataFrame:
     sized = assign_size_tiers(eligible)
     outputs: list[pd.DataFrame] = []
     for sector, group in sized.groupby("sector", sort=True):
-        if len(group) < per_sector:
-            raise ValueError(f"{sector} has only {len(group)} eligible issuers; need {per_sector}")
+        sector_name = str(sector)
+        target = per_sector[sector_name] if isinstance(per_sector, dict) else per_sector
+        if len(group) < target:
+            raise ValueError(f"{sector} has only {len(group)} eligible issuers; need {target}")
         selected = balanced_sample(
             group,
-            target=per_sector,
+            target=target,
             strata=["industry", "size_tier"],
             seed=seed,
         )
@@ -254,8 +256,10 @@ def select_final_universe(
             lambda cik: deterministic_score(str(cik), seed)
         )
         reserve = reserve.sort_values(["random_score", "cik"]).reset_index(drop=True)
-        reserve["random_rank"] = np.arange(per_sector + 1, per_sector + len(reserve) + 1)
+        reserve["random_rank"] = np.arange(target + 1, target + len(reserve) + 1)
         reserve["selection_status"] = "RESERVE"
-        outputs.extend([selected, reserve])
+        outputs.append(selected)
+        if not reserve.empty:
+            outputs.append(reserve)
     result = pd.concat(outputs, ignore_index=True)
     return result.sort_values(["sector", "selection_status", "random_rank", "cik"])

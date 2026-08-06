@@ -23,6 +23,7 @@ def validate_configuration() -> dict[str, object]:
         "temporal_validation.yml",
         "plot_style.yml",
         "modeling.yml",
+        "phase2.yml",
     ]:
         read_yaml(root / "configs" / filename)
     paths = ensure_local_directories(config)
@@ -74,6 +75,61 @@ def main() -> None:
         "run-stages-17-18",
         help="Build Tableau delivery artifacts and audit the Phase 1 release",
     )
+    phase2_readiness = subparsers.add_parser(
+        "audit-phase2-readiness",
+        help="Audit whether the real expanded panel can support Phase 2 claims",
+    )
+    phase2_readiness.add_argument(
+        "--panel",
+        default=None,
+        help="Optional path to a real Phase 2 panel parquet file",
+    )
+    phase2_universe = subparsers.add_parser(
+        "freeze-phase2-universe",
+        help="Select the configured eligible active-company target per sector and freeze reserves",
+    )
+    phase2_universe.add_argument(
+        "--eligibility-audit",
+        default=None,
+        help="Optional path to the real all-candidate eligibility parquet file",
+    )
+    subparsers.add_parser(
+        "build-phase2-eligibility",
+        help="Ingest and audit every mapped active SEC candidate before sampling",
+    )
+    phase2_analysis = subparsers.add_parser(
+        "analyze-phase2-development",
+        help="Build workload, episode, calibration, and uncertainty evidence from real OOF scores",
+    )
+    phase2_analysis.add_argument(
+        "--predictions",
+        default=None,
+        help="Optional path to real Phase 2 out-of-fold predictions",
+    )
+    subparsers.add_parser(
+        "build-phase2-panel",
+        help="Certify selected/reserve issuers and materialize the final point-in-time panel",
+    )
+    subparsers.add_parser(
+        "run-phase2-development-models",
+        help="Run feature ablations and nested temporal Phase 2 logistic challengers",
+    )
+    subparsers.add_parser(
+        "run-phase2-forecasts",
+        help="Backtest KPI forecasts, recalibrate intervals, and build optional forecast features",
+    )
+    subparsers.add_parser(
+        "build-phase2-governance",
+        help="Build company explanations, monitoring evidence, and Phase 2 model/data cards",
+    )
+    subparsers.add_parser(
+        "write-phase2-research-report",
+        help="Write the accessible Phase 2 development research report from generated evidence",
+    )
+    subparsers.add_parser(
+        "run-phase2-horizon-sensitivity",
+        help="Compare two- and four-quarter deterioration horizons on paired temporal folds",
+    )
     arguments = parser.parse_args()
 
     if arguments.command == "validate-config":
@@ -116,6 +172,55 @@ def main() -> None:
         from cfd.stage18 import run_stages_17_to_18
 
         print(json.dumps(run_stages_17_to_18(), indent=2, default=str))
+    elif arguments.command == "audit-phase2-readiness":
+        from pathlib import Path
+
+        from cfd.stage19 import run_stage_19
+
+        panel = Path(arguments.panel) if arguments.panel else None
+        print(json.dumps(run_stage_19(panel), indent=2, default=str))
+    elif arguments.command == "freeze-phase2-universe":
+        from pathlib import Path
+
+        from cfd.stage20 import run_stage_20
+
+        audit = Path(arguments.eligibility_audit) if arguments.eligibility_audit else None
+        print(json.dumps(run_stage_20(audit), indent=2, default=str))
+    elif arguments.command == "build-phase2-eligibility":
+        from cfd.stage21 import run_stage_21
+
+        print(json.dumps(run_stage_21(), indent=2, default=str))
+    elif arguments.command == "analyze-phase2-development":
+        from pathlib import Path
+
+        from cfd.stage22 import run_stage_22
+
+        predictions = Path(arguments.predictions) if arguments.predictions else None
+        print(json.dumps(run_stage_22(predictions), indent=2, default=str))
+    elif arguments.command == "build-phase2-panel":
+        from cfd.stage24 import run_stage_24
+
+        print(json.dumps(run_stage_24(), indent=2, default=str))
+    elif arguments.command == "run-phase2-development-models":
+        from cfd.stage23 import run_stage_23
+
+        print(json.dumps(run_stage_23(), indent=2, default=str))
+    elif arguments.command == "run-phase2-forecasts":
+        from cfd.stage25 import run_stage_25
+
+        print(json.dumps(run_stage_25(), indent=2, default=str))
+    elif arguments.command == "build-phase2-governance":
+        from cfd.stage26 import run_stage_26
+
+        print(json.dumps(run_stage_26(), indent=2, default=str))
+    elif arguments.command == "write-phase2-research-report":
+        from cfd.stage27 import run_stage_27
+
+        print(json.dumps(run_stage_27(), indent=2, default=str))
+    elif arguments.command == "run-phase2-horizon-sensitivity":
+        from cfd.stage28 import run_stage_28
+
+        print(json.dumps(run_stage_28(), indent=2, default=str))
 
 
 if __name__ == "__main__":
