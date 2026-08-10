@@ -176,7 +176,7 @@ def configure(doc, running_title):
     font(footer.add_run("Phase 2 | Development evidence—not a final future test"), 8, color=GRAY)
 
 
-def cover(doc, kicker, title, subtitle):
+def cover(doc, kicker, title, subtitle, meta_text=None):
     for _ in range(5):
         doc.add_paragraph()
     kicker_p = doc.add_paragraph()
@@ -190,13 +190,17 @@ def cover(doc, kicker, title, subtitle):
     subtitle_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
     subtitle_p.paragraph_format.space_after = Pt(26)
     font(subtitle_p.add_run(subtitle), 14, color=BLUE)
-    meta = doc.add_paragraph()
-    meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    font(
-        meta.add_run("SEC EDGAR + FRED | 117 active issuers | Financial cutoff 31 Dec 2025"),
-        10,
-        color=GRAY,
-    )
+    if meta_text is not False:
+        meta = doc.add_paragraph()
+        meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        font(
+            meta.add_run(
+                meta_text
+                or "SEC EDGAR + FRED | 117 active issuers | Financial cutoff 31 Dec 2025"
+            ),
+            10,
+            color=GRAY,
+        )
     doc.add_page_break()
 
 
