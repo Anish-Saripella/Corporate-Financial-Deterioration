@@ -31,7 +31,26 @@ recommendation.
   monitoring, and governance documentation.
 - Reproducible Python, DuckDB/Parquet, configuration, tests, and optional Power BI evidence.
 
-## Completed phases
+## What has been completed
+
+Both planned research phases and their publication deliverables are complete. Phase 2 is complete
+as a development study; only the deliberately delayed prospective future-period evaluation remains
+unopened.
+
+| Workstream | Phase 1 | Phase 2 |
+|---|---|---|
+| Research universe | Certified 60 issuers across two sectors | Expanded and froze 117 issuers: 75 Consumer Discretionary and 42 Utilities |
+| Data engineering | Built filing-aware SEC and vintage-aware FRED/ALFRED pipeline | Rebuilt the expanded point-in-time panel with stricter eligibility and data-quality controls |
+| Financial features | Standardized coverage, cash-flow, leverage, history, peer, and macro measures | Added liquidity, operating-performance, stability, and leakage-safe temporal features |
+| Outcomes | Froze the four-quarter deterioration definition | Preserved the primary outcome and completed a two-quarter sensitivity analysis |
+| Forecasting | Compared naive, structural, and dynamic-regression KPI forecasts | Recalibrated forecast intervals and tested forecast-feature value |
+| Classification | Compared regularized logistic regression and constrained boosting | Compared pooled, partially pooled, and constrained boosted architectures |
+| Validation | Completed expanding-window development and locked holdout evaluation | Completed nested temporal validation, clustered uncertainty, episode analysis, calibration, and policy testing |
+| Interpretation and governance | Published figures, source lineage, model card, and execution records | Added feature stability, company explanations, monitoring, readiness, and analyst-review evidence |
+| Publications | Published the Phase 1 research report | Published the Phase 2 report, recruiter case study, and combined Phase 1 + Phase 2 report |
+
+The primary finished deliverable is the **[combined Phase 1 + Phase 2 research report](reports/publication/Corporate_Financial_Deterioration_Combined_Phase1_Phase2_Research_Report.pdf)**.
+All PDF, Word, and Markdown publications are collected in the [published reports folder](reports/publication/README.md).
 
 ### Phase 1 — reproducible benchmark
 
