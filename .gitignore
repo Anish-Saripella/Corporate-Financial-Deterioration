@@ -33,4 +33,8 @@ dashboards/powerbi/exports/*
 *.duckdb.wal
 *.hyper
 
+# Local planning material; not part of the published Phase 1/2 repository
+/output/
+/tmp/
+
 reports/figures/stage10/05-leverage-and-interest-coverage-risk-map.svg
