@@ -34,7 +34,6 @@ begin with the root [project overview](../README.md) and the [published reports]
 - [Stages 0–7 execution record](stages_0_7_execution.md)
 - [Stages 8–12 execution record](stages_8_12_execution.md)
 - [Stages 13–16 execution record](stages_13_16_execution.md)
-- [Stages 17–18 execution record](stages_17_18_execution.md)
 - [Phase 1 chronological implementation record](phase1_implementation_plan.md)
 
 ## Portfolio material

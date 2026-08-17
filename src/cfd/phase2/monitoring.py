@@ -54,8 +54,7 @@ def feature_monitoring_report(
         if np.isfinite(psi) and psi >= float(monitoring["population_stability_escalation"]):
             severity = "escalation"
         elif (
-            np.isfinite(psi)
-            and psi >= float(monitoring["population_stability_warning"])
+            np.isfinite(psi) and psi >= float(monitoring["population_stability_warning"])
         ) or missingness_change >= float(monitoring["missingness_increase_warning"]):
             severity = "warning"
         else:

@@ -32,7 +32,7 @@ represent bankrupt or delisted firms.
 
 1. `build-phase2-eligibility` downloads the SEC submissions archive and Company Facts for every
    mapped active candidate. The full eligibility audit occurs before final sampling.
-2. `freeze-phase2-universe` uses seed `20260802` to select 75 Consumer and 42 Utility issuers across
+2. `freeze-phase2-universe` uses sampling seed `42` to select 75 Consumer and 42 Utility issuers across
    industry and three asset-size tiers. Seven Consumer reserves are frozen; all eligible Utilities
    are used.
 3. `build-phase2-panel` joins filing-time accounting facts to point-in-time macro vintages. The old
@@ -200,7 +200,7 @@ event rate, ranking, calibration error, and alert volume. PSI at 0.10 triggers i
 0.25 triggers escalation. Drift alone does not authorize retraining. Calibration failure suggests
 recalibration on matured labels; ranking failure requires reconsidering features and model choice.
 
-Versioned artifacts include the universe, replacement audit, source manifests, point-in-time panel,
+Versioned artifacts include the universe, empty replacement audit, source manifests, point-in-time panel,
 feature registry, label sensitivity table, temporal folds, nested selections, raw and calibrated
 OOF predictions, threshold analysis, explanations, monitoring results, and final test report.
 

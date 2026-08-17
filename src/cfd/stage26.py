@@ -68,9 +68,9 @@ def build_recall_first_policy_table(
                             "alert_rate": float(alert.mean()),
                         }
                     )
-            chosen = sorted(
-                candidates, key=lambda item: (item["alert_rate"], -item["threshold"])
-            )[0]
+            chosen = sorted(candidates, key=lambda item: (item["alert_rate"], -item["threshold"]))[
+                0
+            ]
             thresholds[sector] = chosen["threshold"]
             sector_recalls[sector] = chosen["recall"]
         row_thresholds = predictions["sector"].map(thresholds)
@@ -105,8 +105,7 @@ def run_stage_26() -> dict[str, Any]:
     predictions = pd.read_parquet(processed / "phase2_oof_predictions.parquet")
     model, increment = _choose_development_specification(predictions)
     selected = predictions.loc[
-        (predictions["model"] == model)
-        & (predictions["feature_increment"] == increment)
+        (predictions["model"] == model) & (predictions["feature_increment"] == increment)
     ].copy()
     explanation_input = selected.merge(
         features,
@@ -159,19 +158,19 @@ def run_stage_26() -> dict[str, Any]:
                 "PR_AUC": average_precision_score(
                     group["deterioration_label"], group["probability"]
                 ),
-                "Brier_score": brier_score_loss(
-                    group["deterioration_label"], group["probability"]
-                ),
+                "Brier_score": brier_score_loss(group["deterioration_label"], group["probability"]),
             }
         )
     calibration_comparison = pd.DataFrame(calibration_rows)
-    calibration_comparison.to_csv(
-        reports / "phase2_calibration_method_comparison.csv", index=False
+    calibration_comparison.to_csv(reports / "phase2_calibration_method_comparison.csv", index=False)
+    champion_calibration = (
+        calibration_comparison.loc[
+            (calibration_comparison["model"] == model)
+            & (calibration_comparison["feature_increment"] == increment)
+        ]
+        .sort_values(["Brier_score", "calibration_method"])
+        .iloc[0]
     )
-    champion_calibration = calibration_comparison.loc[
-        (calibration_comparison["model"] == model)
-        & (calibration_comparison["feature_increment"] == increment)
-    ].sort_values(["Brier_score", "calibration_method"]).iloc[0]
     calibrated_champion_rows = calibrated.loc[
         (calibrated["model"] == model)
         & (calibrated["feature_increment"] == increment)
@@ -273,12 +272,10 @@ def run_stage_26() -> dict[str, Any]:
                 "value": calibration_error,
                 "unit": "absolute_mean_probability_error",
                 "status": "warning"
-                if calibration_error
-                >= float(config["monitoring"]["calibration_error_warning"])
+                if calibration_error >= float(config["monitoring"]["calibration_error_warning"])
                 else "normal",
                 "action": config["monitoring"]["actions"]["calibration_failure"]
-                if calibration_error
-                >= float(config["monitoring"]["calibration_error_warning"])
+                if calibration_error >= float(config["monitoring"]["calibration_error_warning"])
                 else "continue_monitoring",
             },
             {
@@ -311,8 +308,8 @@ def run_stage_26() -> dict[str, Any]:
     case_rows.loc[~case_rows["alert"] & case_rows["deterioration_label"].eq(1), "case_type"] = (
         "false_negative"
     )
-    disagreement = predictions.groupby("decision_key")["probability"].std().rename(
-        "model_probability_std"
+    disagreement = (
+        predictions.groupby("decision_key")["probability"].std().rename("model_probability_std")
     )
     case_rows = case_rows.merge(disagreement, on="decision_key", how="left")
     explanation_fields = explanations[
@@ -353,8 +350,8 @@ rating, causal conclusion, or trading recommendation.
 
 ## Data and population
 
-- {universe_sector_counts['Consumer Discretionary']} Consumer Discretionary and
-  {universe_sector_counts['Utilities']} Utility issuers at the August 2, 2026 selection date.
+- {universe_sector_counts["Consumer Discretionary"]} Consumer Discretionary and
+  {universe_sector_counts["Utilities"]} Utility issuers at the August 2, 2026 selection date.
 - Financial history is capped at December 31, 2025 and comes from SEC EDGAR and FRED/ALFRED.
 - Delisted firms are excluded, so survivorship bias limits generalization.
 - Former strict Phase 1 certification: {strict_count} issuers; {flagged_count} retained with visible
@@ -382,8 +379,8 @@ on matured outcomes; ranking failure calls for model and feature review.
 
 ## Validation status
 
-Readiness status: `{readiness['status']}`. Final test may be opened:
-`{readiness['final_test_may_be_opened']}`.
+Readiness status: `{readiness["status"]}`. Final test may be opened:
+`{readiness["final_test_may_be_opened"]}`.
 The 2023+ Phase 1 benchmark is consumed and is used only for development analysis. A genuinely new
 future period with matured four-quarter outcomes is required for a final Phase 2 performance claim.
 """

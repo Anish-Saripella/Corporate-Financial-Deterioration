@@ -69,18 +69,14 @@ def run_stage_23() -> dict[str, Any]:
     label_sensitivity_summary(panel, config).to_csv(
         reports / "phase2_label_sensitivity_summary.csv", index=False
     )
-    development_end = (
-        mature["decision_at"].max().to_period("Q") + 1
-    ).start_time
+    development_end = (mature["decision_at"].max().to_period("Q") + 1).start_time
     assignments, locked, folds = build_expanding_window_splits(
         features,
         holdout_start=str(development_end.date()),
         minimum_training_quarters=int(
             config["evaluation_policy"]["minimum_outer_training_quarters"]
         ),
-        validation_window_quarters=int(
-            config["evaluation_policy"]["validation_window_quarters"]
-        ),
+        validation_window_quarters=int(config["evaluation_policy"]["validation_window_quarters"]),
         step_quarters=int(config["evaluation_policy"]["step_quarters"]),
     )
     if not locked.empty:
@@ -140,9 +136,9 @@ def run_stage_23() -> dict[str, Any]:
     feature_stability["selected_in_every_outer_training_fold"] = (
         feature_stability["selected_folds"] == feature_stability["evaluated_folds"]
     )
-    feature_stability["latest_training_fold_recommendation"] = feature_stability[
-        "feature"
-    ].isin(selected_by_fold[latest_fold])
+    feature_stability["latest_training_fold_recommendation"] = feature_stability["feature"].isin(
+        selected_by_fold[latest_fold]
+    )
     feature_stability.to_csv(reports / "phase2_feature_selection_stability.csv", index=False)
     pd.DataFrame(folds).to_csv(reports / "phase2_temporal_folds.csv", index=False)
     result = {

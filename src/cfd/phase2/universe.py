@@ -67,9 +67,7 @@ def select_phase2_universe(
     selected["eligibility_applied_before_sampling"] = True
     selected["outcome_information_used"] = False
     final_counts = (
-        selected.loc[selected["selection_status"] == "SELECTED"]
-        .groupby("sector")["cik"]
-        .nunique()
+        selected.loc[selected["selection_status"] == "SELECTED"].groupby("sector")["cik"].nunique()
     )
     if final_counts.to_dict() != targets:
         raise ValueError(f"Phase 2 selection did not preserve sector targets: {final_counts}")
@@ -103,14 +101,13 @@ def replace_certification_failures(
     final_rows: list[pd.Series] = []
     replacement_rows: list[dict[str, Any]] = []
     for sector, sector_universe in universe.groupby("sector", sort=True):
-        chosen = sector_universe.loc[
-            sector_universe["selection_status"] == "SELECTED"
-        ].sort_values("random_rank")
+        chosen = sector_universe.loc[sector_universe["selection_status"] == "SELECTED"].sort_values(
+            "random_rank"
+        )
         passed = chosen.loc[chosen["cik"].map(status)].copy()
         failed = chosen.loc[~chosen["cik"].map(status)].copy()
         reserves = sector_universe.loc[
-            (sector_universe["selection_status"] == "RESERVE")
-            & sector_universe["cik"].map(status)
+            (sector_universe["selection_status"] == "RESERVE") & sector_universe["cik"].map(status)
         ].sort_values(["random_rank", "random_score", "cik"])
         if len(reserves) < len(failed) and not retain_flagged_shortfall:
             raise ValueError(
@@ -132,9 +129,7 @@ def replace_certification_failures(
                     "replacement_cik": replacement["cik"],
                     "replacement_rank": int(removed["random_rank"]),
                     "replacement_source": "frozen_same_sector_reserve",
-                    "failed_rules": audit.set_index("cik").loc[
-                        removed["cik"], "failed_rules"
-                    ],
+                    "failed_rules": audit.set_index("cik").loc[removed["cik"], "failed_rules"],
                     "outcome_information_used": False,
                 }
             )
@@ -148,9 +143,7 @@ def replace_certification_failures(
                     "replacement_cik": retained["cik"],
                     "replacement_rank": int(retained["random_rank"]),
                     "replacement_source": "retained_with_quality_flag",
-                    "failed_rules": audit.set_index("cik").loc[
-                        retained["cik"], "failed_rules"
-                    ],
+                    "failed_rules": audit.set_index("cik").loc[retained["cik"], "failed_rules"],
                     "outcome_information_used": False,
                 }
             )

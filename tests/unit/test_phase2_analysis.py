@@ -16,9 +16,7 @@ def test_development_evidence_keeps_operating_and_statistical_views_separate() -
                     "decision_key": f"{company_number}|{date.date()}",
                     "cik": str(company_number),
                     "decision_at": date,
-                    "sector": (
-                        "Utilities" if company_number % 2 else "Consumer Discretionary"
-                    ),
+                    "sector": ("Utilities" if company_number % 2 else "Consumer Discretionary"),
                     "deterioration_label": label,
                     "model": "logistic",
                     "probability": 0.8 if label else 0.1,

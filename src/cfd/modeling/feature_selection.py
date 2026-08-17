@@ -127,10 +127,7 @@ def select_features_temporally(
             feature
             for feature, importance, positive_share in ranking
             if feature in protected
-            or (
-                importance > 0
-                and positive_share >= float(policy["minimum_positive_window_share"])
-            )
+            or (importance > 0 and positive_share >= float(policy["minimum_positive_window_share"]))
         ]
         minimum = int(policy["minimum_features"])
         maximum = int(policy["maximum_features"])

@@ -60,6 +60,8 @@ it should not be treated as a complete description of every business segment.
    Discretionary and 42 Utility issuers using the seeded stratified procedure.
 10. Freeze all remaining eligible issuers in a same-sector reserve order before examining outcomes
    or model performance.
+   The reserve order preserves reproducibility for future universe revisions; the completed Phase 2
+   Stage 24 run did not attempt or perform reserve replacement.
 11. Never redraw or replace an issuer because of deterioration prevalence, a label, a prediction,
     or its effect on model performance.
 12. Treat the former all-KPI company certification as a quality tier. Modeling eligibility is

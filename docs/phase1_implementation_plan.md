@@ -13,11 +13,10 @@ explicitly identified as safe parallel work.
 
 ## Execution status
 
-Stages 0–18 were completed on 2026-08-02. Source counts, gate evidence, deviations, assumptions,
+Stages 0–16 and the publication closeout were completed on 2026-08-02. Source counts, gate evidence, deviations, assumptions,
 and limitations are recorded in [`stages_0_7_execution.md`](stages_0_7_execution.md) and
 [`stages_8_12_execution.md`](stages_8_12_execution.md), and
-[`stages_13_16_execution.md`](stages_13_16_execution.md), and
-[`stages_17_18_execution.md`](stages_17_18_execution.md).
+[`stages_13_16_execution.md`](stages_13_16_execution.md).
 
 ## End-to-end sequence
 
@@ -38,7 +37,7 @@ flowchart LR
     M --> N["Train deterioration classifiers"]
     N --> O["Select and document champion models"]
     O --> P["Materialize production pipeline"]
-    P --> Q["Build and verify Tableau dashboard"]
+    P --> Q["Build and verify publication evidence"]
     Q --> R["Reproduce, audit, and publish"]
 ```
 
@@ -106,7 +105,7 @@ flowchart LR
 
 1. Define the Dagster asset graph and partitioning strategy before full ingestion.
 2. Define DuckDB schemas and Parquet partitions for raw metadata, staged facts, fiscal quarters,
-   features, labels, predictions, metrics, and Tableau exports.
+   features, labels, predictions, metrics, and publication tables.
 3. Specify the grain, primary key, foreign keys, availability fields, and expected row counts for
    every table.
 4. Define controlled reason codes for company and fact exclusions.
@@ -128,7 +127,7 @@ phase1_configuration
               └── point_in_time_feature_table
                     ├── kpi_forecasts
                     └── deterioration_predictions
-                          └── tableau_exports
+                          └── publication_evidence
 ```
 
 ### Exit gate
@@ -487,9 +486,9 @@ forecasts as permanent challengers even if more complex models win.
 
 - A clean checkout can reproduce the tested local pipeline by following the README.
 
-## Stage 17 — Build and verify the Tableau dashboard
+## Stage 17 — Build and verify publication evidence
 
-### Pages
+### Publication views
 
 1. Portfolio overview: monitored companies, alert counts, risk distribution, and sector comparison.
 2. Watchlist: probability, change in risk, KPI outlook, peer position, and primary drivers.
@@ -499,16 +498,16 @@ forecasts as permanent challengers even if more complex models win.
 
 ### Actions
 
-1. Generate the four configured Tableau-ready exports from tested marts.
+1. Generate the documented publication tables from tested marts.
 2. Ensure backtest views use out-of-fold predictions only.
-3. Reconcile every Tableau KPI to its Python/DuckDB source calculation.
-4. Add filters for sector, industry, company, period, and alert status.
-5. Clearly label synthetic examples, missing values, forecast uncertainty, and model limitations.
-6. Test dashboard usability, data freshness, and public-data safety.
+3. Reconcile every published KPI to its Python/DuckDB source calculation.
+4. Produce sector, industry, company, period, and alert-status slices.
+5. Clearly label illustrative views, missing values, forecast uncertainty, and model limitations.
+6. Test publication readability, data freshness, and public-data safety.
 
 ### Exit gate
 
-- Dashboard totals and sampled company details exactly match tested analytical outputs.
+- Publication totals and sampled company details exactly match tested analytical outputs.
 
 ## Stage 18 — Reproduce, document, and publish Phase 1
 
@@ -516,7 +515,7 @@ forecasts as permanent challengers even if more complex models win.
 
 1. Rebuild the project from a clean environment using the locked dependencies.
 2. Run all unit, integration, data-contract, leakage, and pipeline tests.
-3. Recreate the universe, data manifests, analytical panel, model results, and Tableau extracts.
+3. Recreate the universe, data manifests, analytical panel, model results, and publication tables.
 4. Complete the data card, model card, architecture diagram, assumptions, and limitations.
 5. Add a concise resume description and technical case-study summary.
 6. Confirm that Git contains no credentials, prohibited source data, machine-specific paths, or
@@ -546,7 +545,7 @@ the end:
 | Small effective sample | Constrained models and company/episode-aware uncertainty |
 | Missing values | Economically specific handling fitted inside training folds |
 | Model leakage | Point-in-time joins and fold-isolated transformations |
-| Dashboard leakage | Out-of-fold backtest exports only |
+| Publication leakage | Out-of-fold backtest evidence only |
 | Data licensing | Public-source register; do not commit restricted raw data |
 | Reproducibility | Locked environment, manifests, configs, tests, and clean rebuild |
 

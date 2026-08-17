@@ -3,7 +3,7 @@
 The system separates acquisition, point-in-time transformation, statistical forecasting,
 classification, evaluation, and publication. Dagster exposes the production asset dependencies;
 the command-line stages provide deterministic local reproduction. DuckDB and Parquet are the
-analytical store, while small CSVs form the stable Tableau interface.
+analytical store, while publication tables and figures provide the stable reporting interface.
 
 ```mermaid
 flowchart LR
@@ -19,10 +19,9 @@ flowchart LR
   H --> I[Expanding-window classifier experiments]
   I --> J[Frozen champion]
   J --> K[One-time 2023+ locked holdout]
-  K --> L[Reconciled Tableau extracts]
-  L --> N[Four-page Tableau workbook]
+  K --> L[Certified publication evidence]
   J --> O[Model card and release audit]
-  N --> O
+  L --> O
 ```
 
 ## Temporal control
@@ -43,8 +42,7 @@ interpretability, and simplicity as supporting criteria.
 
 ## Delivery and governance
 
-Stage 17 reduces model outputs to four documented public CSV contracts and runs exact Python-to-
-Tableau reconciliation. The workbook uses relative paths only. Stage 18 validates the workbook
-XML, required documentation, dependencies, lineage manifests, model evidence, privacy constraints,
-and extract row counts, then hashes release-defining artifacts. Network ingestion is separate from
-cached reproduction to respect public API policies and make normal rebuilds deterministic.
+Publication scripts consume certified model outputs and generate the research reports and figures.
+Release checks cover required documentation, dependencies, lineage manifests, model evidence,
+privacy constraints, and row counts. Network ingestion remains separate from cached reproduction
+to respect public API policies and make normal rebuilds deterministic.

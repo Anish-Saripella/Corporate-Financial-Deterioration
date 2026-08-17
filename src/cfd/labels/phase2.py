@@ -12,9 +12,7 @@ from cfd.evaluation.phase2 import add_episode_ids
 from cfd.labels.deterioration import make_deterioration_label
 
 
-def registered_coverage_labels(
-    panel: pd.DataFrame, config: dict[str, Any]
-) -> dict[str, pd.Series]:
+def registered_coverage_labels(panel: pd.DataFrame, config: dict[str, Any]) -> dict[str, pd.Series]:
     """Build every registered coverage label without using model performance."""
 
     sensitivity = config["label_sensitivity"]
@@ -34,9 +32,7 @@ def registered_coverage_labels(
     return labels
 
 
-def make_multikpi_deterioration_label(
-    panel: pd.DataFrame, config: dict[str, Any]
-) -> pd.Series:
+def make_multikpi_deterioration_label(panel: pd.DataFrame, config: dict[str, Any]) -> pd.Series:
     """Require two of three intuitive forms of future financial weakening.
 
     Components are: the frozen coverage rule, negative free-cash-flow margin,
@@ -84,9 +80,7 @@ def make_multikpi_deterioration_label(
     return output
 
 
-def label_sensitivity_summary(
-    panel: pd.DataFrame, config: dict[str, Any]
-) -> pd.DataFrame:
+def label_sensitivity_summary(panel: pd.DataFrame, config: dict[str, Any]) -> pd.DataFrame:
     """Report row prevalence and distinct episodes for each registered outcome."""
 
     candidates = registered_coverage_labels(panel, config)

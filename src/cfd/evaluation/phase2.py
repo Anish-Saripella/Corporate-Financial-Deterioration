@@ -45,14 +45,11 @@ def add_episode_ids(
         .astype(int)
     )
     prior_date = result.groupby(company_column)[time_column].shift()
-    quarter_gap = (
-        result[time_column].dt.to_period("Q").astype("int64")
-        - prior_date.dt.to_period("Q").astype("int64")
-    )
+    quarter_gap = result[time_column].dt.to_period("Q").astype("int64") - prior_date.dt.to_period(
+        "Q"
+    ).astype("int64")
     positive = pd.to_numeric(result[label_column], errors="coerce").fillna(0).astype(int).eq(1)
-    result["deterioration_episode_start"] = positive & (
-        prior_label.ne(1) | quarter_gap.ne(1)
-    )
+    result["deterioration_episode_start"] = positive & (prior_label.ne(1) | quarter_gap.ne(1))
     episode_number = result["deterioration_episode_start"].groupby(result[company_column]).cumsum()
     result["deterioration_episode_id"] = pd.Series(pd.NA, index=result.index, dtype="string")
     selected = positive
@@ -109,9 +106,7 @@ def episode_review_metrics(
     """Measure how many distinct deterioration episodes enter each review queue."""
 
     data = (
-        predictions
-        if "deterioration_episode_id" in predictions
-        else add_episode_ids(predictions)
+        predictions if "deterioration_episode_id" in predictions else add_episode_ids(predictions)
     )
     episode_ids = set(data["deterioration_episode_id"].dropna().astype(str))
     order = data.sort_values(probability_column, ascending=False, kind="stable")
@@ -120,9 +115,7 @@ def episode_review_metrics(
         if not 0 < fraction <= 1:
             raise ValueError("Each review fraction must be in (0, 1]")
         reviewed = max(int(np.ceil(len(data) * fraction)), 1)
-        captured = set(
-            order.head(reviewed)["deterioration_episode_id"].dropna().astype(str)
-        )
+        captured = set(order.head(reviewed)["deterioration_episode_id"].dropna().astype(str))
         rows.append(
             {
                 "review_fraction": float(fraction),
@@ -312,8 +305,7 @@ def compare_models_clustered(
             continue
         differences["PR_AUC"].append(
             float(
-                average_precision_score(labels, challenger)
-                - average_precision_score(labels, base)
+                average_precision_score(labels, challenger) - average_precision_score(labels, base)
             )
         )
         differences["Brier_score"].append(

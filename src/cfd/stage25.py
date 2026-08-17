@@ -39,9 +39,7 @@ def run_stage_25() -> dict[str, Any]:
         minimum_training_quarters=int(
             phase2["evaluation_policy"]["minimum_outer_training_quarters"]
         ),
-        validation_window_quarters=int(
-            phase2["evaluation_policy"]["validation_window_quarters"]
-        ),
+        validation_window_quarters=int(phase2["evaluation_policy"]["validation_window_quarters"]),
         step_quarters=int(phase2["evaluation_policy"]["step_quarters"]),
     )
     predictions = build_forecast_backtest(panel, pd.DataFrame(folds), forecast_config)
@@ -61,12 +59,9 @@ def run_stage_25() -> dict[str, Any]:
     forecast_features.to_parquet(processed / "phase2_forecast_features.parquet", index=False)
     metrics.to_csv(reports / "phase2_forecast_metrics.csv", index=False)
     selection.to_csv(reports / "phase2_forecast_selection.csv", index=False)
-    interval_calibration.to_csv(
-        reports / "phase2_forecast_interval_calibration.csv", index=False
-    )
-    coverage = (
-        recalibrated.groupby(["kpi", "sector", "horizon"], as_index=False)
-        .agg(empirical_interval_coverage=("interval_covered", "mean"))
+    interval_calibration.to_csv(reports / "phase2_forecast_interval_calibration.csv", index=False)
+    coverage = recalibrated.groupby(["kpi", "sector", "horizon"], as_index=False).agg(
+        empirical_interval_coverage=("interval_covered", "mean")
     )
     coverage.to_csv(reports / "phase2_forecast_interval_coverage.csv", index=False)
     result: dict[str, Any] = {

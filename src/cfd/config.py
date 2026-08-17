@@ -64,7 +64,6 @@ class Storage(StrictModel):
     processed_dir: str
     manifests_dir: str
     duckdb_path: str
-    tableau_export_dir: str
 
 
 class SourcePolicy(StrictModel):
@@ -142,7 +141,6 @@ def resolve_storage_paths(config: ProjectConfig) -> dict[str, Path]:
         "processed": under_data(config.storage.processed_dir),
         "manifests": under_data(config.storage.manifests_dir),
         "duckdb": duckdb_path,
-        "tableau": root / config.storage.tableau_export_dir,
     }
 
 

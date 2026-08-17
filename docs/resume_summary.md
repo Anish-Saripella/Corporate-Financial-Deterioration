@@ -3,7 +3,7 @@
 ## Resume project entry
 
 **Corporate Financial Deterioration Early-Warning Platform — Python, SQL, DuckDB, Dagster,
-scikit-learn, statsmodels, Tableau**
+scikit-learn, statsmodels**
 
 - Engineered a reproducible point-in-time SEC/FRED pipeline for 60 public companies and 3,150
   certified fiscal-quarter observations, standardizing non-calendar filings and enforcing
@@ -15,8 +15,7 @@ scikit-learn, statsmodels, Tableau**
   gradient-boosted trees; the frozen champion achieved 0.397 PR-AUC, 0.563 recall, and 1.97x
   top-decile lift on an untouched 2023+ holdout.
 - Delivered a Dagster asset graph, DuckDB/Parquet feature store, automated quality gates, model and
-  data cards, and a reconciled four-page Tableau dashboard for sector monitoring and analyst
-  watchlist review.
+  data cards, and publication-ready research reports with sector and company-level evidence.
 
 ## Interview narrative
 

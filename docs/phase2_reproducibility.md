@@ -27,6 +27,9 @@ use the researcher's own `FRED_API_KEY`. `.env.example` contains placeholders on
 
 ## Full ordered workflow
 
+Phase 2 is executed through the ordered CLI stages below. Dagster currently represents the Phase 1
+asset graph; it does not orchestrate the complete Phase 2 workflow.
+
 The candidate-ingestion steps require network access and valid local credentials:
 
 ```bash
@@ -66,6 +69,10 @@ This executes, in order:
   sampler.
 - Feature selection and model fitting: `20260802`.
 - Company-clustered bootstrap: `20260805`.
+
+The completed Stage 24 run retained all 117 selected companies, assigned 37 companies to the
+retained-with-quality-flag tier, and made zero reserve replacements. The frozen reserve order is
+lineage for a future universe revision, not evidence that replacements occurred in this run.
 
 Seeds make reruns deterministic against identical source artifacts and software. They do not make
 live source APIs immutable; source manifests and checksums provide that audit trail.

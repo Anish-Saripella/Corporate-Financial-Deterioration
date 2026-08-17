@@ -49,9 +49,10 @@ def run_stage_20(eligibility_path: Path | None = None) -> dict[str, Any]:
         "random_seed": int(policy["random_seed"]),
         "selected_companies": int((frozen["selection_status"] == "SELECTED").sum()),
         "reserve_companies": int((frozen["selection_status"] == "RESERVE").sum()),
-        "sector_counts": frozen.loc[frozen["selection_status"] == "SELECTED"].groupby(
-            "sector"
-        )["cik"].nunique().to_dict(),
+        "sector_counts": frozen.loc[frozen["selection_status"] == "SELECTED"]
+        .groupby("sector")["cik"]
+        .nunique()
+        .to_dict(),
         "selection_sha256": digest,
         "outcomes_or_model_results_used": False,
     }

@@ -255,18 +255,12 @@ def nested_select_boosting_policy(
     for parameters in config["boosting_candidates"]:
         scores = []
         for fit, validation in windows:
-            estimator = _fit_boosting(
-                fit, numeric_features, categorical_features, parameters
-            )
+            estimator = _fit_boosting(fit, numeric_features, categorical_features, parameters)
             probability = estimator.predict_proba(validation[columns])[:, 1]
             scores.append(
-                average_precision_score(
-                    validation["deterioration_label"].astype(int), probability
-                )
+                average_precision_score(validation["deterioration_label"].astype(int), probability)
             )
-        candidates.append(
-            BoostingSelection(dict(parameters), float(np.mean(scores)), len(scores))
-        )
+        candidates.append(BoostingSelection(dict(parameters), float(np.mean(scores)), len(scores)))
     # If PR-AUC ties, prefer fewer trees and shallower depth.
     return sorted(
         candidates,
@@ -308,9 +302,9 @@ def run_nested_logistic_architectures(
         train_keys = fold.loc[fold["split"] == "TRAIN", "decision_key"]
         validation_keys = fold.loc[fold["split"] == "VALIDATION", "decision_key"]
         outer_training = indexed.loc[train_keys].dropna(subset=["deterioration_label"]).copy()
-        outer_validation = indexed.loc[validation_keys].dropna(
-            subset=["deterioration_label"]
-        ).copy()
+        outer_validation = (
+            indexed.loc[validation_keys].dropna(subset=["deterioration_label"]).copy()
+        )
         for architecture in architectures:
             training = outer_training.copy()
             validation = outer_validation.copy()

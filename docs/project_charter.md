@@ -19,7 +19,7 @@ certainty about rare catastrophic events.
 - Structural/regression state-space models as forecasting challengers.
 - Regularized logistic regression and gradient-boosted trees as deterioration models.
 - Expanding-window validation and an event-audited final holdout.
-- Tableau dashboard using out-of-fold or genuine forward predictions.
+- Publication reports using out-of-fold or genuine forward predictions.
 
 ## Non-goals for Phase 1
 
@@ -34,5 +34,5 @@ certainty about rare catastrophic events.
 
 Phase 1 is complete only when another person can recreate the research universe and analytical
 table from public sources, reproduce the time-aware validation, generate the three KPI forecasts
-and two classifier comparisons, run all quality checks, and regenerate documented Tableau-ready
+and two classifier comparisons, run all quality checks, and regenerate documented publication
 outputs without using uncommitted business logic.

@@ -29,7 +29,7 @@ recommendation.
   forecasting baselines.
 - Probability calibration, sector-specific evaluation, threshold selection, feature stability,
   monitoring, and governance documentation.
-- Reproducible Python, DuckDB/Parquet, configuration, tests, and optional Power BI evidence.
+- Reproducible Python, DuckDB/Parquet, configuration, tests, and publication evidence.
 
 ## What has been completed
 
@@ -70,6 +70,10 @@ PR-AUC versus 0.379 for the partially pooled logistic model.
 Phase 2 results are development evidence. The post-2025 future test remains unopened until its
 four-quarter outcomes mature, so the repository does not claim final prospective performance.
 
+Dagster represents the completed Phase 1 asset graph. Phase 2 is reproduced through deterministic,
+fail-fast CLI stages; the repository does not claim that the Phase 2 workflow is fully represented
+as Dagster assets.
+
 See the [combined report](reports/publication/Corporate_Financial_Deterioration_Combined_Phase1_Phase2_Research_Report.pdf)
 for interpretation, limitations, and the complete comparison.
 
@@ -83,9 +87,9 @@ for interpretation, limitations, and the complete comparison.
 ├── configs/              Versioned research, data, feature, and modeling decisions
 ├── tests/                Unit and integration tests
 ├── sql/                  Versioned DuckDB transformations
-├── dashboards/           Optional Power BI prototype and supporting evidence
 ├── scripts/              Publication-generation scripts
 ├── data/                 Local data locations; generated data is not committed
+├── reports/source_data/  Certified evidence used by publication generators
 └── reports/figures/      Reproducible figures supporting the published reports
 ```
 

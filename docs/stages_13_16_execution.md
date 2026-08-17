@@ -49,7 +49,7 @@ presence, and figure-manifest completeness. Each run records configuration hashe
 elapsed time, source scope, and stage summaries.
 
 Generated analytical data and model binaries remain ignored by Git; reproducible code,
-configuration, documentation, and publication figures are retained. The next stage is Tableau
+configuration, documentation, and publication figures are retained. The next stage is publication
 delivery, not further tuning against the locked holdout.
 
 ## Publication figures

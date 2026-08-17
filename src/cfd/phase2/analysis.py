@@ -40,14 +40,10 @@ def development_evidence(
     data = predictions.copy()
     data["decision_at"] = pd.to_datetime(data["decision_at"])
     if "feature_increment" in data:
-        data["model"] = data["model"].astype(str) + " | " + data[
-            "feature_increment"
-        ].astype(str)
+        data["model"] = data["model"].astype(str) + " | " + data["feature_increment"].astype(str)
     if "calibration_method" in data:
         calibration_scope = (
-            data["calibration_scope"].astype(str)
-            if "calibration_scope" in data
-            else "overall"
+            data["calibration_scope"].astype(str) if "calibration_scope" in data else "overall"
         )
         data["model"] = (
             data["model"].astype(str)

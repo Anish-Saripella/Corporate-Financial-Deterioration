@@ -3,23 +3,42 @@ name: quality
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test:
+  quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONPATH: src
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v7
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.12"
           enable-cache: true
-      - run: uv sync --locked --extra dev
-      - run: uv run cfd validate-config
-      - run: uv run ruff format --check .
-      - run: uv run ruff check .
-      - run: uv run mypy src
-      - run: uv run dagster definitions validate -m cfd.orchestration.definitions
-      - run: uv run pytest -m "not network"
+
+      - name: Install locked dependencies
+        run: uv sync --locked --extra dev
+
+      - name: Validate configuration
+        run: uv run python -m cfd.cli validate-config
+
+      - name: Check formatting and lint
+        run: |
+          uv run ruff format --check .
+          uv run ruff check .
+
+      - name: Check types and orchestration definitions
+        run: |
+          uv run mypy src
+          uv run dagster definitions validate -m cfd.orchestration.definitions
+
+      - name: Run non-network tests
+        run: uv run pytest -m "not network"

@@ -60,7 +60,7 @@ def _load_or_download_macro() -> pd.DataFrame:
 
 
 def run_stage_24() -> dict[str, Any]:
-    """Apply identical KPI/lineage gates and deterministic reserve replacement."""
+    """Apply final certification and retain selected issuers with explicit quality tiers."""
 
     root = repository_root()
     paths = stage_paths()
@@ -77,9 +77,7 @@ def run_stage_24() -> dict[str, Any]:
     macro = _load_or_download_macro()
     macro_config = read_yaml(root / "configs" / "macro_series.yml")["macro_series"]
     cached_panel = paths.interim / "phase2_candidate_point_in_time_panel.parquet"
-    candidate_panel = (
-        pd.read_parquet(cached_panel) if cached_panel.exists() else pd.DataFrame()
-    )
+    candidate_panel = pd.read_parquet(cached_panel) if cached_panel.exists() else pd.DataFrame()
     required_candidate_ciks = set(frozen["cik"].astype(str))
     if candidate_panel.empty or not required_candidate_ciks.issubset(
         set(candidate_panel["cik"].astype(str))
@@ -94,15 +92,14 @@ def run_stage_24() -> dict[str, Any]:
     targets = {sector: int(value) for sector, value in policy["target_count_by_sector"].items()}
     base_version = str(frozen["universe_version"].iloc[0])
     rules, certification = certify_panel(candidate_panel, universe_version=base_version)
-    # Persist the complete pre-replacement evidence even when reserves cannot
-    # support the configured target. This makes an infeasible gate auditable.
+    # Persist complete certification evidence before assigning quality tiers.
+    # Phase 2 retains the frozen selected universe rather than replacing firms
+    # that fail the stricter Phase 1 all-KPI company gate.
     candidate_panel.to_parquet(
         paths.interim / "phase2_candidate_point_in_time_panel.parquet", index=False
     )
     rules.to_parquet(paths.interim / "phase2_candidate_certification_rules.parquet", index=False)
-    certification.to_csv(
-        paths.reports / "phase2_candidate_certification_summary.csv", index=False
-    )
+    certification.to_csv(paths.reports / "phase2_candidate_certification_summary.csv", index=False)
     final_universe = frozen.loc[frozen["selection_status"] == "SELECTED"].copy()
     replacements = pd.DataFrame(
         columns=[
@@ -146,17 +143,13 @@ def run_stage_24() -> dict[str, Any]:
             "quality_tier",
         ]
     ].copy()
-    final_panel = final_panel.merge(
-        lineage_metadata, on="cik", how="left", validate="many_to_one"
-    )
+    final_panel = final_panel.merge(lineage_metadata, on="cik", how="left", validate="many_to_one")
     final_facts = facts.loc[facts["cik"].isin(final_ciks)].copy()
     final_certification = certification.loc[certification["cik"].isin(final_ciks)].copy()
     expected_total = sum(targets.values())
     final_sector_counts = final_universe.groupby("sector")["cik"].nunique().to_dict()
     if len(final_certification) != expected_total or final_sector_counts != targets:
-        raise ValueError(
-            f"Final Phase 2 universe does not match confirmed targets {targets}"
-        )
+        raise ValueError(f"Final Phase 2 universe does not match confirmed targets {targets}")
     final_universe.to_parquet(paths.processed / "phase2_selected_universe.parquet", index=False)
     final_panel.to_parquet(paths.processed / "phase2_point_in_time_panel.parquet", index=False)
     final_facts.to_parquet(paths.processed / "phase2_financial_facts_final.parquet", index=False)
@@ -175,6 +168,7 @@ def run_stage_24() -> dict[str, Any]:
         "financial_fact_rows": len(final_facts),
         "synthetic_data_used": False,
         "outcome_or_model_information_used_for_replacement": False,
+        "replacement_attempted": False,
         "strict_certification_is_quality_tier_not_exclusion_gate": True,
         "company_quarter_eligibility_is_modeling_gate": True,
     }

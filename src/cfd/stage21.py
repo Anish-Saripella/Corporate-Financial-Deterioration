@@ -40,9 +40,7 @@ def run_stage_21() -> dict[str, Any]:
     submissions = raw_root / "submissions.zip"
     settings = RuntimeSettings()
     user_agent = settings.require_sec_user_agent()
-    submissions_url = (
-        "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip"
-    )
+    submissions_url = "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip"
     with SecClient(user_agent=user_agent) as client:
         if not submissions.exists():
             client.download(
@@ -92,9 +90,7 @@ def run_stage_21() -> dict[str, Any]:
         candidates,
         wide,
         eligibility_mode="company_quarter",
-        minimum_interest_coverage_quarters=int(
-            rules["minimum_interest_coverage_quarters"]
-        ),
+        minimum_interest_coverage_quarters=int(rules["minimum_interest_coverage_quarters"]),
         minimum_consecutive_interest_coverage_quarters=int(
             rules["minimum_consecutive_interest_coverage_quarters"]
         ),
@@ -114,14 +110,11 @@ def run_stage_21() -> dict[str, Any]:
     (paths.reports / "phase2_ingestion_failures.json").write_text(
         json.dumps(failures, indent=2) + "\n", encoding="utf-8"
     )
-    eligible_counts = (
-        eligibility.loc[eligibility["eligible"]].groupby("sector")["cik"].nunique()
-    )
+    eligible_counts = eligibility.loc[eligibility["eligible"]].groupby("sector")["cik"].nunique()
     targets = {sector: int(value) for sector, value in policy["target_count_by_sector"].items()}
     if any(eligible_counts.get(sector, 0) < target for sector, target in targets.items()):
         raise ValueError(
-            f"Real eligibility audit cannot support {targets}: "
-            f"{eligible_counts.to_dict()}"
+            f"Real eligibility audit cannot support {targets}: {eligible_counts.to_dict()}"
         )
     return {
         "status": "complete",

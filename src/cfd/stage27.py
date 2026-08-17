@@ -23,13 +23,9 @@ def run_stage_27() -> dict[str, Any]:
     root = repository_root()
     reports = root / "reports" / "generated"
     metrics = pd.read_csv(reports / "phase2_metrics.csv")
-    overall = metrics.loc[metrics["slice"] == "Overall"].sort_values(
-        "PR_AUC", ascending=False
-    )
+    overall = metrics.loc[metrics["slice"] == "Overall"].sort_values("PR_AUC", ascending=False)
     best = overall.iloc[0]
-    primary = overall.loc[
-        overall["model"].str.startswith("partially_pooled_logistic")
-    ].iloc[0]
+    primary = overall.loc[overall["model"].str.startswith("partially_pooled_logistic")].iloc[0]
     forecast = pd.read_csv(reports / "phase2_forecast_metrics.csv")
     monitoring = pd.read_csv(reports / "phase2_feature_monitoring.csv")
     policy = pd.read_csv(reports / "phase2_development_policy_selection.csv").iloc[0]
@@ -43,16 +39,16 @@ def run_stage_27() -> dict[str, Any]:
 ## Executive conclusion
 
 Phase 2 studies {len(universe)} currently active issuers—
-{sector_counts['Consumer Discretionary']} Consumer Discretionary and
-{sector_counts['Utilities']} Utilities—and implements a reproducible real-data analytical
+{sector_counts["Consumer Discretionary"]} Consumer Discretionary and
+{sector_counts["Utilities"]} Utilities—and implements a reproducible real-data analytical
 pipeline. The strongest development
-ranking is `{best['model']}`, with {_metric_line(best)}. This is encouraging relative to the Phase 1
+ranking is `{best["model"]}`, with {_metric_line(best)}. This is encouraging relative to the Phase 1
 development benchmark, but it is **not a final performance result** because the 2023-and-later
 period was already examined in Phase 1.
 
-The project is currently `{readiness['status']}` for a final Phase 2 claim. The panel contains
-{readiness['sector_evidence'][0]['episodes']} Consumer Discretionary and
-{readiness['sector_evidence'][1]['episodes']} Utility deterioration episodes, below the registered
+The project is currently `{readiness["status"]}` for a final Phase 2 claim. The panel contains
+{readiness["sector_evidence"][0]["episodes"]} Consumer Discretionary and
+{readiness["sector_evidence"][1]["episodes"]} Utility deterioration episodes, below the registered
 150-per-sector evidence gate, and no new untouched test boundary has matured.
 
 ## Population and sampling
@@ -86,7 +82,7 @@ gradient boosting is the nonlinear challenger. Missing values are imputed inside
 preventing future information from entering training.
 
 The registered partially pooled primary model achieved {_metric_line(primary)}. The nonlinear
-challenger achieved {_metric_line(best)} over {int(best['observations'])} unique out-of-fold
+challenger achieved {_metric_line(best)} over {int(best["observations"])} unique out-of-fold
 company-quarters. PR-AUC emphasizes ranking of the relatively uncommon deterioration events. The
 Brier score is the mean squared probability error, so lower is better. Precision measures the share
 of alerts that are events; recall measures the share of events found.
@@ -97,27 +93,27 @@ intervals instead of assuming normally distributed errors.
 
 ## Interpretation and monitoring
 
-The pipeline produces {governance['explanations']} company-quarter explanation records. Reason
+The pipeline produces {governance["explanations"]} company-quarter explanation records. Reason
 codes identify unusually
 weak coverage, cash flow, leverage, peer position, financing conditions, forecast uncertainty, or
 filing delay. These are predictive associations and are explicitly non-causal.
 
 Monitoring compares pre-2023 development distributions with 2023-2025. The current run flags
-{len(warnings)} of seven monitored features: {', '.join(warnings) if warnings else 'none'}. PSI is
+{len(warnings)} of seven monitored features: {", ".join(warnings) if warnings else "none"}. PSI is
 a practical drift diagnostic: 0.10 requests investigation and 0.25 escalation. A flag does not by
 itself authorize retraining.
 
 ## Calibration and alert policy
 
 The best development calibration choice for the registered primary specification is
-`{policy['calibration_method']}` with `{policy['calibration_scope']}` scope. Calibration selection
+`{policy["calibration_method"]}` with `{policy["calibration_scope"]}` scope. Calibration selection
 is based only on earlier out-of-fold predictions and later development rows. Sector-specific
 calibration could not be estimated reliably because the
 earlier calibration fold did not contain both outcome classes in every sector.
 
 The screening policy targets 80% recall within each sector. The Consumer threshold is
-{policy['consumer_threshold']:.3f} and the Utility threshold is {policy['utility_threshold']:.3f}.
-Together they produce {policy['alert_rate']:.1%} workload and {policy['precision']:.1%} precision.
+{policy["consumer_threshold"]:.3f} and the Utility threshold is {policy["utility_threshold"]:.3f}.
+Together they produce {policy["alert_rate"]:.1%} workload and {policy["precision"]:.1%} precision.
 Precision is reported as the operational cost of prioritizing recall; thresholds are not forced to
 match across sectors.
 

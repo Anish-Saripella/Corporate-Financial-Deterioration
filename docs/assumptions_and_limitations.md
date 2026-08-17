@@ -5,7 +5,7 @@
 Phase 1 deliberately uses two contrasting sectors: cyclical Consumer Discretionary and regulated,
 more defensive Utilities. It fixes 30 currently listed companies per sector and excludes delisted
 firms. This keeps public-data engineering and manual validation feasible, but creates survivorship
-bias and prevents claims about the full corporate-credit population. The synthetic portfolio is a
+bias and prevents claims about the full corporate-credit population. The research portfolio is a
 research watchlist, not a bank loan book; exposure, recovery, covenant, collateral, and private
 borrower information are unavailable.
 
@@ -28,23 +28,17 @@ summarize KPI dynamics. Forecast intervals materially under-cover for some four-
 so uncertainty is diagnostic rather than a guaranteed confidence statement. Random walks remain
 the mandatory benchmark; added complexity must win out of time to be credible.
 
-## Classifier and dashboard limitations
+## Classifier limitations
 
 The champion is a gradient-boosted tree ensemble trained on only 60 firms and two sectors. OOF and
 holdout performance show useful ranking lift, but precision is modest, particularly for Utilities.
 Feature importance is associational and not causal. The alert threshold is a research threshold,
 not an approved credit policy, and the 2023+ holdout is not retuned after evaluation.
 
-The Power BI watchlist shows the latest evaluated prediction for each company, which may have a
-different filing decision date across issuers. It does not invent scores for unavailable future
-labels or display in-sample fitted probabilities. Dashboard data may become stale after new filings;
-the displayed freshness date and source manifests should be checked before interpretation.
-
-The delivered PBIX is a valid package with an embedded data model, four named pages, and headline
-KPIs that reconcile to the certified import workbook. The supplied authoring-canvas screenshots
-also expose several unbound placeholder visuals. Until those bindings receive a final Power BI
-Desktop pass and refreshed screenshots, the report is analytically auditable but not fully
-presentation-ready.
+Published company examples use the latest evaluated prediction available for each issuer, so their
+filing decision dates may differ. They do not invent scores for unavailable future labels or present
+in-sample fitted probabilities as out-of-sample evidence. Source manifests and decision dates should
+be checked before interpreting a company example.
 
 ## Appropriate interpretation
 

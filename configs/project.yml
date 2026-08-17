@@ -35,7 +35,6 @@ storage:
   processed_dir: data/processed
   manifests_dir: data/manifests
   duckdb_path: data/processed/cfd.duckdb
-  tableau_export_dir: dashboards/tableau/exports
 
 source_policy:
   free_public_only: true

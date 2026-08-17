@@ -7,9 +7,7 @@ from cfd.modeling.phase2 import _equal_sector_sample_weight, run_nested_logistic
 
 
 def test_unequal_sample_receives_equal_total_sector_training_weight() -> None:
-    frame = pd.DataFrame(
-        {"sector": ["Consumer Discretionary"] * 6 + ["Utilities"] * 2}
-    )
+    frame = pd.DataFrame({"sector": ["Consumer Discretionary"] * 6 + ["Utilities"] * 2})
     weights = _equal_sector_sample_weight(frame)
     weighted = frame.assign(weight=weights).groupby("sector")["weight"].sum()
     assert np.isclose(weighted.iloc[0], weighted.iloc[1])

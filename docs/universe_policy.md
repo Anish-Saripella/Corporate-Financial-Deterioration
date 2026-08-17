@@ -26,7 +26,7 @@ universe audit table.
 ## Reproducible sampling
 
 After applying all eligibility rules, select companies by stratified random sampling without
-replacement using the project seed `20260802`. Stratify by sector, broad industry, and three
+replacement using the Phase 1 project seed `20260802`. Stratify by sector, broad industry, and three
 filing-derived size tiers based primarily on median total assets during the development period.
 Maintain a deterministic reserve order.
 

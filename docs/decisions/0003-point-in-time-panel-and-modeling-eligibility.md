@@ -42,7 +42,7 @@ the deterioration label, event prevalence, or model performance can influence de
    material failure. Every replacement records the original company, replacement, sector, failed
    rule, evidence, timestamp, and resulting universe version.
 10. Survivorship bias from using currently listed companies is accepted and must appear in public
-    findings, the model card, and dashboard documentation.
+    findings, the model card, and publication documentation.
 11. Deterioration thresholds and the final holdout are finalized only after a development-period
     event audit, without optimizing against final model performance.
 

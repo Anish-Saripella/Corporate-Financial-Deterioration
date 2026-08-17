@@ -38,11 +38,9 @@ def test_temporal_calibration_uses_only_earlier_oof_folds() -> None:
                     "probability": 0.7 if index % 2 else 0.2,
                 }
             )
-    calibrated = cross_fitted_temporal_calibration(
-        pd.DataFrame(rows), ["none", "platt"]
-    )
+    calibrated = cross_fitted_temporal_calibration(pd.DataFrame(rows), ["none", "platt"])
     assert set(calibrated["fold_id"]) == {"fold_1", "fold_2"}
     assert set(calibrated["calibration_method"]) == {"none", "platt"}
-    assert calibrated.loc[
-        calibrated["fold_id"] == "fold_1", "calibration_training_folds"
-    ].eq(1).all()
+    assert (
+        calibrated.loc[calibrated["fold_id"] == "fold_1", "calibration_training_folds"].eq(1).all()
+    )

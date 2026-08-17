@@ -195,8 +195,7 @@ def cover(doc, kicker, title, subtitle, meta_text=None):
         meta.alignment = WD_ALIGN_PARAGRAPH.CENTER
         font(
             meta.add_run(
-                meta_text
-                or "SEC EDGAR + FRED | 117 active issuers | Financial cutoff 31 Dec 2025"
+                meta_text or "SEC EDGAR + FRED | 117 active issuers | Financial cutoff 31 Dec 2025"
             ),
             10,
             color=GRAY,

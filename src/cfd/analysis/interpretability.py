@@ -121,9 +121,7 @@ def build_company_explanations(
         raise ValueError(f"Scored rows are missing explanation columns: {sorted(missing)}")
     rows: list[dict[str, Any]] = []
     for _, row in scored.iterrows():
-        reasons = company_reason_codes(
-            row, development_reference, maximum_reasons=maximum_reasons
-        )
+        reasons = company_reason_codes(row, development_reference, maximum_reasons=maximum_reasons)
         probability = float(row["probability"])
         risk_band = "High" if probability >= 0.67 else "Medium" if probability >= 0.33 else "Low"
         rows.append(

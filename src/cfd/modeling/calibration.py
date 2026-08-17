@@ -32,9 +32,7 @@ class ProbabilityCalibrator:
     method: str
     fitted_model: Any = None
 
-    def fit(
-        self, probabilities: NDArray[Any], labels: NDArray[Any]
-    ) -> ProbabilityCalibrator:
+    def fit(self, probabilities: NDArray[Any], labels: NDArray[Any]) -> ProbabilityCalibrator:
         scores = _validate(probabilities)
         target = np.asarray(labels, dtype=int)
         if len(scores) != len(target) or np.unique(target).size < 2:
@@ -96,9 +94,7 @@ def cross_fitted_temporal_calibration(
         raise ValueError(f"Calibration predictions are missing columns: {sorted(missing)}")
     data = predictions.copy()
     data["decision_at"] = pd.to_datetime(data["decision_at"])
-    fold_order = (
-        data.groupby("fold_id")["decision_at"].min().sort_values().index.tolist()
-    )
+    fold_order = data.groupby("fold_id")["decision_at"].min().sort_values().index.tolist()
     output: list[pd.DataFrame] = []
     for fold_position, fold_id in enumerate(fold_order):
         if fold_position == 0:
@@ -131,9 +127,7 @@ def cross_fitted_temporal_calibration(
                     calibrated["raw_probability"].to_numpy(dtype=float)
                 )
                 calibrated["calibration_method"] = method
-                calibrated["calibration_scope"] = (
-                    str(group_name) if sector_specific else "pooled"
-                )
+                calibrated["calibration_scope"] = str(group_name) if sector_specific else "pooled"
                 calibrated["calibration_training_folds"] = len(previous_folds)
                 output.append(calibrated)
     if not output:

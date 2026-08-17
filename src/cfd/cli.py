@@ -17,7 +17,6 @@ def validate_configuration() -> dict[str, object]:
         "label.yml",
         "macro_series.yml",
         "sec_tags.yml",
-        "tableau.yml",
         "analytical_panel.yml",
         "feature_registry.yml",
         "temporal_validation.yml",
@@ -70,10 +69,6 @@ def main() -> None:
         "--reuse-forecasts",
         action="store_true",
         help="Run a smaller model refresh using the existing certified Stage 13 forecasts",
-    )
-    subparsers.add_parser(
-        "run-stages-17-18",
-        help="Build Tableau delivery artifacts and audit the Phase 1 release",
     )
     phase2_readiness = subparsers.add_parser(
         "audit-phase2-readiness",
@@ -168,10 +163,6 @@ def main() -> None:
                 default=str,
             )
         )
-    elif arguments.command == "run-stages-17-18":
-        from cfd.stage18 import run_stages_17_to_18
-
-        print(json.dumps(run_stages_17_to_18(), indent=2, default=str))
     elif arguments.command == "audit-phase2-readiness":
         from pathlib import Path
 

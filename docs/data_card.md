@@ -42,7 +42,7 @@ Missing values are preserved and handled inside each training fold rather than g
 
 ## Redistribution and refresh
 
-Derived dashboard CSVs are suitable for public portfolio demonstration. Raw SEC/FRED downloads,
-processed Parquet tables, and serialized models remain ignored because they are reproducible and
-can be large. Refreshes must preserve source usage policies, manifests, eligibility rules, and the
-frozen holdout boundary; a changed universe or label requires a new version.
+Derived publication tables are suitable for public portfolio demonstration. Raw SEC/FRED downloads,
+most processed Parquet tables, and serialized models remain ignored because they are reproducible
+and can be large. Refreshes must preserve source usage policies, manifests, eligibility rules, and
+the frozen holdout boundary; a changed universe or label requires a new version.

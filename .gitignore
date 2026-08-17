@@ -25,10 +25,6 @@ data/external/*
 !data/external/.gitkeep
 data/manifests/*
 !data/manifests/.gitkeep
-dashboards/tableau/exports/*
-!dashboards/tableau/exports/.gitkeep
-dashboards/powerbi/exports/*
-!dashboards/powerbi/exports/.gitkeep
 *.duckdb
 *.duckdb.wal
 *.hyper

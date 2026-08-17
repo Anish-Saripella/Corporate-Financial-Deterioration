@@ -15,8 +15,6 @@ from cfd.stage13 import run_stage_13
 from cfd.stage14 import run_stage_14
 from cfd.stage15 import run_stage_15
 from cfd.stage16 import finalize_stage_16
-from cfd.stage17 import run_stage_17
-from cfd.stage18 import run_stage_18
 
 
 def _table_metadata(path: Path, *, key: str = "decision_key") -> dict[str, Any]:
@@ -121,15 +119,3 @@ def production_model_pipeline() -> MaterializeResult[Any]:
         started_at=time.monotonic(),
     )
     return MaterializeResult(metadata={"run_manifest": MetadataValue.json(result)})
-
-
-@asset(deps=[production_model_pipeline], group_name="delivery")
-def tableau_dashboard_exports() -> MaterializeResult[Any]:
-    result = run_stage_17()
-    return MaterializeResult(metadata={"summary": MetadataValue.json(result)})
-
-
-@asset(deps=[tableau_dashboard_exports], group_name="governance")
-def phase1_release_audit() -> MaterializeResult[Any]:
-    result = run_stage_18()
-    return MaterializeResult(metadata={"summary": MetadataValue.json(result)})

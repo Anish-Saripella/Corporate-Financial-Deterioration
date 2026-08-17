@@ -85,9 +85,7 @@ def fit_empirical_intervals(
     ]
 
 
-def apply_empirical_intervals(
-    forecasts: pd.DataFrame, calibration: pd.DataFrame
-) -> pd.DataFrame:
+def apply_empirical_intervals(forecasts: pd.DataFrame, calibration: pd.DataFrame) -> pd.DataFrame:
     """Apply frozen development residual widths to later forecasts."""
 
     result = forecasts.merge(
@@ -97,11 +95,14 @@ def apply_empirical_intervals(
         validate="many_to_one",
     )
     if result["absolute_residual_quantile"].isna().any():
-        missing = result.loc[result["absolute_residual_quantile"].isna(), [
-            "kpi",
-            "sector",
-            "horizon",
-        ]].drop_duplicates()
+        missing = result.loc[
+            result["absolute_residual_quantile"].isna(),
+            [
+                "kpi",
+                "sector",
+                "horizon",
+            ],
+        ].drop_duplicates()
         raise ValueError(f"No empirical interval calibration for: {missing.to_dict('records')}")
     result["lower_interval"] = result["forecast"] - result["absolute_residual_quantile"]
     result["upper_interval"] = result["forecast"] + result["absolute_residual_quantile"]

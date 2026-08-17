@@ -62,20 +62,16 @@ def test_certification_failure_uses_frozen_same_sector_reserve() -> None:
     certification["certified"] = True
     certification["failed_rules"] = "[]"
     removed = frozen.loc[
-        (frozen["sector"] == "Utilities")
-        & (frozen["selection_status"] == "SELECTED")
+        (frozen["sector"] == "Utilities") & (frozen["selection_status"] == "SELECTED")
     ].iloc[0]
     certification.loc[certification["cik"] == removed["cik"], "certified"] = False
-    certification.loc[
-        certification["cik"] == removed["cik"], "failed_rules"
-    ] = '["KPI_COVERAGE"]'
-    expected_reserve = frozen.loc[
-        (frozen["sector"] == "Utilities")
-        & (frozen["selection_status"] == "RESERVE")
-    ].sort_values(["random_rank", "random_score", "cik"]).iloc[0]
-    final, replacements = replace_certification_failures(
-        frozen, certification, target_per_sector=6
+    certification.loc[certification["cik"] == removed["cik"], "failed_rules"] = '["KPI_COVERAGE"]'
+    expected_reserve = (
+        frozen.loc[(frozen["sector"] == "Utilities") & (frozen["selection_status"] == "RESERVE")]
+        .sort_values(["random_rank", "random_score", "cik"])
+        .iloc[0]
     )
+    final, replacements = replace_certification_failures(frozen, certification, target_per_sector=6)
     assert len(final) == 12
     assert replacements.iloc[0]["replacement_cik"] == expected_reserve["cik"]
     assert replacements.iloc[0]["replacement_source"] == "frozen_same_sector_reserve"
@@ -87,18 +83,18 @@ def test_certification_shortfall_can_be_retained_with_quality_flag() -> None:
     certification["certified"] = True
     certification["failed_rules"] = "[]"
     failed = frozen.loc[
-        (frozen["sector"] == "Utilities")
-        & (frozen["selection_status"] == "SELECTED")
+        (frozen["sector"] == "Utilities") & (frozen["selection_status"] == "SELECTED")
     ].iloc[0]
     certification.loc[certification["cik"] == failed["cik"], "certified"] = False
     certification.loc[
-        (certification["cik"].isin(
-            frozen.loc[
-                (frozen["sector"] == "Utilities")
-                & (frozen["selection_status"] == "RESERVE"),
-                "cik",
-            ]
-        )),
+        (
+            certification["cik"].isin(
+                frozen.loc[
+                    (frozen["sector"] == "Utilities") & (frozen["selection_status"] == "RESERVE"),
+                    "cik",
+                ]
+            )
+        ),
         "certified",
     ] = False
     certification.loc[~certification["certified"], "failed_rules"] = '["KPI_COVERAGE"]'
@@ -110,9 +106,7 @@ def test_certification_shortfall_can_be_retained_with_quality_flag() -> None:
         retain_flagged_shortfall=True,
     )
 
-    retained = replacements.loc[
-        replacements["replacement_source"] == "retained_with_quality_flag"
-    ]
+    retained = replacements.loc[replacements["replacement_source"] == "retained_with_quality_flag"]
     assert len(final) == 12
     assert retained["replacement_cik"].tolist() == [failed["cik"]]
     assert final.loc[final["cik"] == failed["cik"], "quality_tier"].iloc[0] == (

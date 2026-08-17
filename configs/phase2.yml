@@ -150,7 +150,8 @@ universe_policy:
   model_performance_aware_replacement_allowed: false
   survivorship_bias_accepted: true
   final_certification_treatment:
-    policy: replace_when_certified_reserve_available_then_retain_flagged_shortfall
+    policy: retain_frozen_selection_with_explicit_quality_tiers
+    reserve_replacement_attempted: false
     all_three_kpis_company_exclusion_gate: false
     strict_phase1_certification_retained_as_quality_tier: true
     row_level_modeling_eligibility: true

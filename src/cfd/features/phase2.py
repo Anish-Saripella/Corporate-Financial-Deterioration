@@ -58,16 +58,14 @@ def engineer_phase2_financial_features(panel: pd.DataFrame) -> pd.DataFrame:
     grouped = result.groupby("cik", sort=False)
 
     # Debt structure and near-term refinancing pressure.
-    result["short_term_debt_share"] = _safe_ratio(
-        result["short_term_debt"], result["total_debt"]
-    )
+    result["short_term_debt_share"] = _safe_ratio(result["short_term_debt"], result["total_debt"])
     result["refinancing_gap_to_assets"] = _safe_ratio(
         result["short_term_debt"] - result["cash_and_equivalents"],
         result["total_assets"],
     )
-    result["interest_expense_growth_yoy"] = _safe_ratio(
-        result["interest_expense_ttm"], grouped["interest_expense_ttm"].shift(4)
-    ) - 1
+    result["interest_expense_growth_yoy"] = (
+        _safe_ratio(result["interest_expense_ttm"], grouped["interest_expense_ttm"].shift(4)) - 1
+    )
 
     # Liquidity, internal funding, and capital-investment burden.
     result["working_capital_to_assets"] = _safe_ratio(
@@ -81,13 +79,11 @@ def engineer_phase2_financial_features(panel: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Operating performance and asset use.
-    result["revenue_growth_yoy"] = _safe_ratio(
-        result["revenue_ttm"], grouped["revenue_ttm"].shift(4)
-    ) - 1
-    result["asset_turnover"] = _safe_ratio(result["revenue_ttm"], result["total_assets"])
-    result["net_income_margin_ttm"] = _safe_ratio(
-        result["net_income_ttm"], result["revenue_ttm"]
+    result["revenue_growth_yoy"] = (
+        _safe_ratio(result["revenue_ttm"], grouped["revenue_ttm"].shift(4)) - 1
     )
+    result["asset_turnover"] = _safe_ratio(result["revenue_ttm"], result["total_assets"])
+    result["net_income_margin_ttm"] = _safe_ratio(result["net_income_ttm"], result["revenue_ttm"])
 
     # Changes and volatility distinguish persistent deterioration from a weak quarter.
     temporal_features = [
@@ -108,11 +104,11 @@ def engineer_phase2_financial_features(panel: pd.DataFrame) -> pd.DataFrame:
         result[f"{feature}_volatility_8q"] = (
             company_feature.rolling(8, min_periods=4).std().reset_index(level=0, drop=True)
         )
-        expanding_mean = company_feature.expanding(min_periods=8).mean().reset_index(
-            level=0, drop=True
+        expanding_mean = (
+            company_feature.expanding(min_periods=8).mean().reset_index(level=0, drop=True)
         )
-        expanding_std = company_feature.expanding(min_periods=8).std().reset_index(
-            level=0, drop=True
+        expanding_std = (
+            company_feature.expanding(min_periods=8).std().reset_index(level=0, drop=True)
         )
         result[f"{feature}_distance_from_history"] = _safe_ratio(
             result[feature] - expanding_mean, expanding_std
