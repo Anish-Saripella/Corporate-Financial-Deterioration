@@ -2,7 +2,7 @@
 PYTHON ?= python3
 export PYTHONPATH := src
 
-.PHONY: help bootstrap install lock test lint format typecheck defs-check check dagster config-check clean reproduce-phase1 reproduce-phase2-analysis reproduce-phase3-development
+.PHONY: help bootstrap install lock test lint format typecheck defs-check check dagster config-check clean reproduce-phase1 reproduce-phase2-analysis reproduce-phase2-model-optimization reproduce-phase3-development
 
 help:
 	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z_-]+:.*## / {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -56,8 +56,10 @@ reproduce-phase2-analysis: check ## Rebuild Phase 2 analysis from the certified 
 	.venv/bin/python -m cfd.cli write-phase2-research-report
 	.venv/bin/python scripts/generate_phase2_publication.py
 
-reproduce-phase3-development: check ## Rebuild Phase 3 development evidence without reopening the final test
+reproduce-phase2-model-optimization: check ## Rebuild Phase 2 model-optimization evidence without reopening the final test
 	.venv/bin/python -m cfd.cli run-phase3-development
+
+reproduce-phase3-development: reproduce-phase2-model-optimization
 
 clean: ## Remove generated caches (preserves source data)
 	find . -type d -name __pycache__ -prune -exec rm -r {} +

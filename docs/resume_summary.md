@@ -3,33 +3,43 @@
 ## Resume project entry
 
 **Corporate Financial Deterioration Early-Warning Platform — Python, SQL, DuckDB, Dagster,
-scikit-learn, statsmodels**
+scikit-learn, XGBoost, statsmodels**
 
-- Engineered a reproducible point-in-time SEC/FRED pipeline for 60 public companies and 3,150
-  certified fiscal-quarter observations, standardizing non-calendar filings and enforcing
-  availability-date, lineage, KPI-coverage, and leakage controls.
-- Forecast interest coverage, free-cash-flow margin, and debt-to-assets with random-walk, drift,
-  and state-space models; converted forecast level, change, and uncertainty into leakage-safe risk
-  features evaluated through expanding-window backtests.
-- Built a champion–challenger framework comparing regularized logistic regression and calibrated
-  gradient-boosted trees; the frozen champion achieved 0.397 PR-AUC, 0.563 recall, and 1.97x
-  top-decile lift on an untouched 2023+ holdout.
-- Delivered a Dagster asset graph, DuckDB/Parquet feature store, automated quality gates, model and
-  data cards, and publication-ready research reports with sector and company-level evidence.
+- Engineered a reproducible, point-in-time SEC/FRED pipeline for 117 active public companies across
+  Consumer Discretionary and Utilities, standardizing fiscal quarters and enforcing filing-date,
+  source-lineage, continuity, and leakage controls without synthetic or proprietary data.
+- Forecast interest coverage, free-cash-flow margin, and debt-to-assets; converted forecast level,
+  change, and uncertainty into leakage-safe risk features evaluated with expanding-window temporal
+  validation.
+- Compared interpretable, tree-based, support-vector, sector-specific, and ensemble classifiers;
+  froze a 60% pooled / 40% sector-specific XGBoost blend before a one-time out-of-time evaluation.
+- Achieved 0.841 ROC-AUC, 0.494 PR-AUC, and 85.7% recall on a sealed late-2024 test containing 178
+  observations and 28 deterioration events, while reducing the comparable development alert rate
+  from 57.6% to 51.3% at the 80%-recall policy.
+- Delivered tested Python modules, DuckDB/Parquet analytical storage, machine-readable evidence,
+  documented limitations, and publication-ready research reports.
 
 ## Interview narrative
 
-The project demonstrates the full lifecycle rather than a collection of algorithms. Start with the
-business framing: deterioration in debt-service capacity is measurable and decision-relevant,
-whereas bankruptcy is too rare and poorly labeled for this public-data scope. Explain how filing
-dates prevent look-ahead leakage, why two sectors test cyclical differences, and why delisted-company
-exclusion is disclosed as survivorship bias.
+Start with the business problem: analysts need a repeatable way to prioritize companies for review
+when debt-service capacity may weaken. The target is therefore a defined decline in future interest
+coverage, not bankruptcy or default. The model is an additional screening tool; its probability and
+supporting financial signals help analysts decide where to investigate further.
 
-Then describe model choice. Random walks establish whether state-space complexity adds value;
-logistic regression provides an interpretable baseline; constrained boosted trees capture nonlinear
-interactions. PR-AUC fits the imbalanced alert task, while calibration, recall, lift, false alerts,
-sector stability, and an untouched holdout prevent a single metric from dictating selection.
+Then explain the data design. SEC filing dates prevent look-ahead leakage, fiscal-quarter
+normalization makes issuers comparable, and FRED/ALFRED vintages preserve what was historically
+available. The sample is restricted to active issuers and two sectors, so survivorship bias and
+limited sector generalization are disclosed rather than hidden.
 
-Conclude with judgment: the holdout shows meaningful ranking but modest precision and weaker
-Utilities performance. The system is therefore an analyst prioritization tool with transparent KPI
-evidence and uncertainty, not an automated credit decision or default model.
+For modeling, regularized logistic regression provides an interpretable benchmark, while random
+forests, histogram gradient boosting, support-vector models, and XGBoost test whether nonlinear
+thresholds or sector-specific relationships improve ranking. Candidate models and static or
+time-adaptive ensembles were compared only in development. A fixed XGBoost blend and thresholds
+were then frozen before the sealed late-2024 test.
+
+Use the metrics deliberately. ROC-AUC summarizes ranking across thresholds; PR-AUC is important
+because deterioration events are the minority class; recall measures how many events are captured;
+and alert rate translates the threshold into analyst workload. The sealed test exceeded the 0.80
+ROC-AUC target and captured 85.7% of events, but the 51.1% alert rate remains substantial and the
+Utility result is based on only seven events. That combination supports a useful review-prioritizing
+tool while keeping the statistical limitations visible.

@@ -1,9 +1,10 @@
-# Phase 3 model accuracy and ensemble methodology
+# Phase 2 model optimization and ensemble methodology
 
 ## Purpose
 
-Phase 3 improves model discrimination and analyst workload without changing the frozen 117-company
-population or four-quarter deterioration definition. ROC-AUC is the lead discrimination metric;
+This Phase 2 optimization improves model discrimination and analyst workload without changing the
+frozen 117-company population or four-quarter deterioration definition. ROC-AUC is the lead
+discrimination metric;
 PR-AUC remains a required guardrail because deterioration events are less common than non-events.
 
 ## Validation design
@@ -21,9 +22,9 @@ configuration hash were frozen.
 ## Models and ensembles
 
 The comparison includes pooled and sector-specific versions of regularized logistic regression,
-random forest, Extra Trees, histogram gradient boosting, XGBoost, and an RBF support-vector
-challenger. Static averages, rank averaging, inner-window winner selection, performance weighting,
-stacking, and time-adaptive weights are evaluated from cross-fitted probabilities.
+random forest, histogram gradient boosting, XGBoost, and an RBF support-vector challenger. Static
+averages, rank averaging, inner-window winner selection, performance weighting, stacking, and
+time-adaptive weights are evaluated from cross-fitted probabilities.
 
 Adaptive weights may use only earlier validation windows that are fully completed before the
 current origin. This prevents the model from choosing a winner using the outcome of the window it
@@ -57,6 +58,9 @@ The evidence therefore supports a successful out-of-time test, not a claim that 
 or sector will achieve 0.80+ ROC-AUC.
 
 ## Reproduction
+
+The implementation retains its original internal `phase3` command and configuration names so the
+frozen evidence lineage is not rewritten.
 
 ```bash
 python -m cfd.cli run-phase3-development

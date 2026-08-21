@@ -9,7 +9,7 @@ begin with the root [project overview](../README.md) and the [published reports]
 - [Phase 1 architecture](architecture.md)
 - [Phase 2 scope and sampling](phase2_scope_and_sampling.md)
 - [Phase 2 methodology](phase2_methodology.md)
-- [Phase 3 model accuracy and ensemble methodology](phase3_methodology.md)
+- [Phase 2 model optimization and ensemble methodology](phase2_model_optimization_methodology.md)
 - [Assumptions and limitations](assumptions_and_limitations.md)
 
 ## Data and point-in-time controls

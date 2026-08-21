@@ -6,7 +6,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import pandas as pd
 from docx import Document
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
@@ -204,6 +203,8 @@ def cover(doc, kicker, title, subtitle, meta_text=None):
 
 
 def make_figures(horizon, policy, features):
+    import matplotlib.pyplot as plt
+
     FIGURES.mkdir(parents=True, exist_ok=True)
     overall = horizon.loc[horizon["sector"].eq("Overall")].set_index("horizon_quarters")
     fig, axes = plt.subplots(1, 3, figsize=(8.3, 3.6))

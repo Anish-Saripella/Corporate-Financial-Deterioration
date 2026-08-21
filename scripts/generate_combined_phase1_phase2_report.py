@@ -3,11 +3,14 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import pandas as pd
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from generate_phase2_publication import (
     AMBER,
     GRAY,
@@ -18,6 +21,7 @@ from generate_phase2_publication import (
     configure,
     cover,
     figure,
+    font,
     heading,
 )
 
@@ -30,7 +34,30 @@ OUTPUT = (
 )
 
 
+def add_centered_page_number(paragraph) -> None:
+    """Add a Word PAGE field to the centered footer paragraph."""
+    paragraph.text = ""
+    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    run = paragraph.add_run()
+    font(run, 8, color=GRAY)
+    begin = OxmlElement("w:fldChar")
+    begin.set(qn("w:fldCharType"), "begin")
+    instruction = OxmlElement("w:instrText")
+    instruction.set("{http://www.w3.org/XML/1998/namespace}space", "preserve")
+    instruction.text = " PAGE "
+    separate = OxmlElement("w:fldChar")
+    separate.set(qn("w:fldCharType"), "separate")
+    value = OxmlElement("w:t")
+    value.text = "1"
+    end = OxmlElement("w:fldChar")
+    end.set(qn("w:fldCharType"), "end")
+    for element in (begin, instruction, separate, value, end):
+        run._r.append(element)
+
+
 def make_figures(horizon: pd.DataFrame) -> None:
+    import matplotlib.pyplot as plt
+
     FIGURES.mkdir(parents=True, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(8.2, 3.8))
@@ -106,43 +133,50 @@ def add_evidence_box(doc: Document) -> None:
                 "Final benchmark for the original 60-company experiment",
             ],
             [
-                "2. Phase 2 model development",
+                "2. Phase 2 initial model development",
                 "Expanding-window OOF",
                 "Model-selection and policy evidence; not a final future test",
             ],
             [
-                "3. Two-quarter sensitivity",
+                "3. Phase 2 model optimization",
+                "Sealed late-2024 out-of-time test",
+                "Final test evidence for the frozen 117-company optimization experiment",
+            ],
+            [
+                "4. Two-quarter sensitivity",
                 "Paired OOF experiment",
                 "Tests a different warning horizon; does not replace the primary label",
             ],
             [
-                "4. Post-2025 prospective test",
+                "5. Post-2025 prospective test",
                 "Unopened and outcome-immature",
-                "Only this can support a new final generalization claim",
+                "Provides an additional future-period replication after outcomes mature",
             ],
         ],
         [2500, 2450, 4410],
     )
 
 
-def build_report() -> Document:
+def build_report(*, regenerate_figures: bool = True) -> Document:
     horizon = pd.read_csv(GENERATED / "phase2_horizon_comparison.csv")
     cases = pd.read_csv(GENERATED / "phase2_company_case_studies.csv")
     recall_policy = pd.read_csv(GENERATED / "phase2_recall_first_threshold_table.csv")
-    make_figures(horizon)
+    optimized = json.loads(
+        (ROOT / "reports" / "source_data" / "phase3_final_metrics.json").read_text(encoding="utf-8")
+    )
+    if regenerate_figures:
+        make_figures(horizon)
 
     doc = Document()
     configure(
         doc, "Corporate Financial Deterioration | Integrated Financial Risk Research Analysis"
     )
-    doc.sections[0].footer.paragraphs[
-        0
-    ].text = "Integrated financial risk analysis | Evidence levels remain separate"
+    add_centered_page_number(doc.sections[0].footer.paragraphs[0])
     cover(
         doc,
         "Financial Risk & Data Science Research",
         "Corporate Financial Deterioration Early-Warning Platform",
-        "Integrated Financial Risk Research Analysis: Phase 1 and Phase 2",
+        "Integrated Financial Risk Research Analysis",
         meta_text=False,
     )
 
@@ -158,12 +192,17 @@ def build_report() -> Document:
     )
     body(
         doc,
-        "What Phase 2 improved. The sample increased to 117 active issuers; eligibility permitted defensible optional-field gaps; feature selection moved inside temporal folds; the registered model became an interpretable partially pooled logistic specification; calibration, sector thresholds, clustered uncertainty, monitoring, and company-level explanations were added. The primary reached 0.379 development PR-AUC and the constrained boosting challenger reached 0.412. These are development estimates and cannot be treated as a new final test.",
+        "What Phase 2 improved. The sample increased to 117 active issuers; eligibility permitted defensible optional-field gaps; feature selection moved inside temporal folds; the registered model became an interpretable partially pooled logistic specification; calibration, sector thresholds, clustered uncertainty, monitoring, and company-level explanations were added. The primary reached 0.379 development PR-AUC and the constrained boosting challenger reached 0.412.",
         "What Phase 2 improved. ",
     )
     body(
         doc,
-        "Decision conclusion. The project has achieved a credible research prototype for recall-first analyst triage. Four quarters should remain the primary horizon. Two quarters is useful only as a near-term secondary flag because it reduced workload but also reduced PR-AUC, precision, and warning lead. Definitive Phase 2 performance remains unresolved until the post-2025 prospective outcomes mature.",
+        "What subsequent Phase 2 optimization achieved. The same population, data, and four-quarter outcome were retained while additional model families and ensemble techniques were compared through rolling temporal validation. A frozen blend of pooled and sector-specific XGBoost achieved 0.841 ROC-AUC, 0.494 PR-AUC, and 85.7% recall on a sealed late-2024 out-of-time test whose outcomes matured during 2025.",
+        "What subsequent Phase 2 optimization achieved. ",
+    )
+    body(
+        doc,
+        "Decision conclusion. The project has achieved a credible research prototype for recall-first analyst triage and a successful out-of-time model evaluation. Four quarters should remain the primary horizon. Two quarters is useful only as a near-term secondary flag because it reduced workload but also reduced PR-AUC, precision, and warning lead. A later matured period is still needed to determine whether the improvement repeats over time.",
         "Decision conclusion. ",
     )
     add_evidence_box(doc)
@@ -566,14 +605,14 @@ def build_report() -> Document:
                 f"Why it is a missed deterioration. The {case['probability']:.1%} probability was narrowly below the {case['sector_threshold']:.1%} Utility threshold, so the model did not issue an alert. Coverage subsequently fell from {case['interest_coverage_ttm']:.2f}x to {case['future_minimum_interest_coverage']:.2f}x within {case['warning_lead_quarters']:.0f} quarter—a {decline:.1%} decline that crossed below 1.5x and met the realized-outcome rule.",
                 "Why it is a missed deterioration. ",
             )
-    heading(doc, "14. Phase 1-to-Phase 2 performance comparison")
+    heading(doc, "14. Phase 1-to-initial-Phase 2 performance comparison")
     body(
         doc,
-        "Phase 2 did not establish a conclusive performance improvement over Phase 1 because the numbers come from different populations and evidence levels. Phase 1's 0.397 PR-AUC is a one-time final holdout result. Phase 2's 0.379 primary and 0.412 challenger are development OOF estimates after expanding the population and changing the modeling procedure. The challenger exceeds the numerical Phase 1 benchmark, while the interpretable primary is slightly lower, but neither comparison is a valid replacement for the unopened prospective test.",
+        "The initial Phase 2 analysis did not establish a conclusive performance improvement over Phase 1 because the numbers came from different populations and evidence levels. Phase 1's 0.397 PR-AUC is a one-time final holdout result. The initial Phase 2 estimates of 0.379 for the primary model and 0.412 for the challenger are development OOF results after expanding the population and changing the modeling procedure. The challenger exceeded the numerical Phase 1 benchmark, while the interpretable primary was slightly lower, but neither comparison replaced an out-of-time test.",
     )
     add_table(
         doc,
-        ["Dimension", "Phase 1", "Phase 2", "Assessment"],
+        ["Dimension", "Phase 1", "Initial Phase 2", "Assessment"],
         [
             [
                 "Issuer coverage",
@@ -584,20 +623,20 @@ def build_report() -> Document:
             [
                 "Final evidence",
                 "Locked 2023+ holdout evaluated",
-                "Post-2025 test unopened",
-                "Phase 2 final generalization unresolved",
+                "Development OOF only at that stage",
+                "Later out-of-time evidence is reported in Section 16",
             ],
             [
                 "Primary PR-AUC",
                 "0.397 holdout",
                 "0.379 development OOF",
-                "No defensible claim of decline or improvement",
+                "No defensible improvement claim at that stage",
             ],
             [
                 "Best challenger PR-AUC",
                 "0.397 holdout champion",
                 "0.412 development OOF",
-                "Promising, pending final test",
+                "Promising result that motivated later optimization",
             ],
             [
                 "Decision policy",
@@ -615,7 +654,72 @@ def build_report() -> Document:
         [1900, 2100, 2200, 3160],
     )
 
-    heading(doc, "15. Limitations and governance")
+    heading(doc, "15. Phase 2 model improvement and ensemble design")
+    body(
+        doc,
+        "The next Phase 2 step held the 117-company population, public-data inputs, four-quarter deterioration outcome, and point-in-time rules constant. This made the experiment a controlled model improvement exercise: performance changes were driven primarily by the modeling and validation process rather than by adding sectors, companies, or a different target.",
+    )
+    body(
+        doc,
+        "The comparison covered regularized logistic regression, random forest, histogram gradient boosting, XGBoost, and a nonlinear support-vector challenger. Logistic regression preserved a transparent linear benchmark. Random forest and boosting allowed financial variables to matter through thresholds and interactions—for example, weak cash flow becoming more concerning when leverage is elevated—without requiring those relationships to be specified in advance.",
+    )
+    body(
+        doc,
+        "The ensemble experiments included equal and rank averaging, averaging the strongest models, selecting a recent-window winner, performance-weighted averaging, time-adaptive weighting, stacking, and focused blends. The time-adaptive approach used only completed earlier validation windows when assigning weights, so it could not choose a model using the outcome of the period being predicted. Broad averaging and hard window-by-window switching were not consistently better: weaker models diluted strong predictions, and a model that won one period did not necessarily remain strongest in the next.",
+    )
+    body(
+        doc,
+        "The selected ensemble assigns 60% weight to pooled XGBoost and 40% to sector-specific XGBoost. The pooled component learns relationships supported across both sectors and benefits the smaller Utility sample. The sector-specific component allows Consumer Discretionary and Utility relationships to differ. The blend therefore balances statistical stability with economically reasonable sector flexibility.",
+    )
+
+    heading(doc, "16. Optimized model results and comparison")
+    development = optimized["development"]
+    sealed = optimized["sealed_late_2024_test"]
+    add_table(
+        doc,
+        ["Model evidence", "ROC-AUC", "PR-AUC", "Recall", "Precision", "Alert rate"],
+        [
+            [
+                "Initial Phase 2 boosting — development OOF",
+                "0.716",
+                "0.412",
+                f"{policy['overall_recall']:.1%}",
+                f"{policy['precision']:.1%}",
+                f"{policy['alert_rate']:.1%}",
+            ],
+            [
+                "Optimized ensemble — development OOF",
+                f"{development['ROC_AUC']:.3f}",
+                f"{development['PR_AUC']:.3f}",
+                f"{development['recall']:.1%}",
+                f"{development['precision']:.1%}",
+                f"{development['alert_rate']:.1%}",
+            ],
+            [
+                "Optimized ensemble — sealed late-2024 test",
+                f"{sealed['ROC_AUC']:.3f}",
+                f"{sealed['PR_AUC']:.3f}",
+                f"{sealed['recall']:.1%}",
+                f"{sealed['precision']:.1%}",
+                f"{sealed['alert_rate']:.1%}",
+            ],
+        ],
+        [3200, 1230, 1230, 1230, 1230, 1240],
+    )
+    body(
+        doc,
+        "The development comparison is the clearest measure of improvement because it uses the same expanded population and the same evidence level. ROC-AUC increased from 0.716 to 0.760 and PR-AUC increased from 0.412 to 0.462. At approximately the same 80% recall objective, precision increased from 29.8% to 33.4% and the alert rate declined from 57.6% to 51.3%. The model therefore ranked deteriorations more effectively while sending a smaller share of observations to analysts.",
+    )
+    body(
+        doc,
+        "After the model families, feature process, blend weight, and sector thresholds were frozen, the ensemble was evaluated once on decisions from July through December 2024 whose four-quarter outcomes matured during 2025. Across 178 observations from 93 companies and 28 deterioration events, it achieved 0.841 ROC-AUC, 0.494 PR-AUC, and 85.7% recall. ROC-AUC measures how consistently the model ranks deteriorating observations above non-deteriorating observations across all thresholds; PR-AUC focuses more directly on ranking the less common deterioration events.",
+    )
+    body(
+        doc,
+        "These results are stronger than the earlier development evidence because they combine higher ranking metrics with a later period that was not used to select the final specification. They do not mean every alert was correct: sealed-test precision was 26.4%, and 51.1% of observations still entered the review queue because the policy intentionally favors finding deteriorations over minimizing false alerts. Company-clustered 95% intervals of 0.742-0.924 for ROC-AUC and 0.317-0.691 for PR-AUC also show that uncertainty remains meaningful.",
+    )
+
+    heading(doc, "17. Limitations and governance")
     bullet(
         doc,
         "Potential value of failed-company histories: Adding point-in-time eligible delisted and failed issuers could expose the model to more severe deterioration paths, increase the diversity of observed events, and test whether the financial signals generalize beyond companies that remain active today.",
@@ -652,10 +756,10 @@ def build_report() -> Document:
         doc,
         "The recall-first policy creates a large review queue. Capacity, review outcomes, and alert fatigue should be monitored prospectively.",
     )
-    heading(doc, "16. Bridge backtest and prospective test plan")
+    heading(doc, "18. Bridge analysis and prospective test plan")
     body(
         doc,
-        "Before the final post-2025 prospective test matures, the project will conduct a pseudo-prospective backtest. Models will be trained using financial information available through 31 December 2023, predictions will be generated from information available at decision dates during 2024, and those predictions will be evaluated against four-quarter outcomes extending through 2025. This preserves the order in which information became available and provides a recent backtest. However, because the 2024-2025 period has already been observed during the broader project, the result will be treated as retrospective development evidence rather than a new untouched holdout.",
+        "Phase 2 completed the planned recent-period evaluation by freezing the optimized model before scoring decisions from July through December 2024 against four-quarter outcomes extending through 2025. Information availability, label maturity, and temporal order were preserved. This provides sealed out-of-time evidence for the current experiment, while a later period that matures after the model freeze remains valuable as an additional prospective replication.",
     )
     body(
         doc,
@@ -724,14 +828,14 @@ def build_report() -> Document:
         "Extension rule: a third sector should be a separately documented research extension after the two-sector baseline is frozen, with a valid taxonomy and adequate issuer/event coverage.",
     )
 
-    heading(doc, "17. Final conclusions")
+    heading(doc, "19. Final conclusions")
     body(
         doc,
-        "The project achieved its Phase 1 goal: a reproducible, point-in-time financial deterioration prototype with a legitimate locked-holdout benchmark. It also achieved the implementation goals of Phase 2: broader sampling, more defensible missing-data eligibility, interpretable partial pooling, fold-local feature selection, empirical forecast-interval recalibration, recall-first sector thresholds, uncertainty estimates, monitoring, horizon sensitivity, and company cases.",
+        "The project achieved its Phase 1 goal: a reproducible, point-in-time financial deterioration prototype with a legitimate locked-holdout benchmark. It also achieved the goals of Phase 2: broader sampling, more defensible missing-data eligibility, interpretable partial pooling, fold-local feature selection, empirical forecast-interval recalibration, recall-first sector thresholds, uncertainty estimates, monitoring, horizon sensitivity, company cases, systematic model optimization, and a sealed out-of-time evaluation.",
     )
     body(
         doc,
-        "The project has not yet achieved a definitive Phase 2 future-performance result. The current evidence supports a controlled analyst-augmentation use case and a strong financial data-science portfolio demonstration, not autonomous credit decisions. The most defensible operating design is a four-quarter medium-term primary screen, an optional two-quarter near-term flag, transparent reason codes, and mandatory manual review.",
+        "The optimized ensemble's 0.841 ROC-AUC, 0.494 PR-AUC, and 85.7% recall provide successful later-period test evidence, but one period and two sectors cannot establish universal future performance. The model serves as an additional screening tool that flags companies for further review and helps analysts identify potential interest-coverage problems more efficiently. The most defensible operating design is a four-quarter medium-term primary screen, an optional two-quarter near-term flag, transparent reason codes, and mandatory manual review.",
     )
     body(
         doc,
@@ -743,25 +847,26 @@ def build_report() -> Document:
         doc,
         ["Artifact", "Role"],
         [
-            ["README.md", "Project status, Phase 1 benchmark, limitations, and Phase 2 design"],
+            [
+                "README.md",
+                "Project status, benchmark, limitations, Phase 2 design, and publication links",
+            ],
             [
                 "configs/phase2.yml",
-                "Frozen Phase 2 population, seed, model, horizon, and threshold policy",
+                "Frozen population, seed, model, horizon, and threshold policy; tests verify key controls",
             ],
             ["docs/point_in_time_policy.md", "Availability and leakage rules"],
             ["docs/phase2_methodology.md", "Plain-language Phase 2 technical definitions"],
             [
-                "reports/generated/phase2_*.csv",
-                "Auditable metrics, thresholds, feature evidence, cases, monitoring, and sensitivity results",
+                "reports/generated/phase2_*.csv and reports/source_data/*final_metrics.json",
+                "Auditable Phase 2 metrics, feature evidence, monitoring, sensitivity, and sealed-test support",
             ],
-            [
-                "reports/publication/*Phase1* and *Phase2*",
-                "Phase-specific published research records",
-            ],
-            ["tests/", "Sampling, transformation, temporal, leakage, model, and reporting checks"],
         ],
         [3600, 5760],
     )
+    trailing_paragraph = doc.paragraphs[-1]
+    if not trailing_paragraph.text:
+        trailing_paragraph._element.getparent().remove(trailing_paragraph._element)
     return doc
 
 

@@ -1,9 +1,10 @@
-# Phase 3 Model Accuracy and Ensemble Results
+# Phase 2 Model Optimization and Out-of-Time Results
 
 ## Executive result
 
-Phase 3 improved the corporate deterioration model without adding companies, sectors, synthetic
-data, or proprietary information. The frozen ensemble achieved **0.841 ROC-AUC** and **0.494
+The Phase 2 model-optimization work improved the corporate deterioration model without adding
+companies, sectors, synthetic data, or proprietary information. The frozen ensemble achieved
+**0.841 ROC-AUC** and **0.494
 PR-AUC** on a sealed late-2024 out-of-time test whose four-quarter outcomes matured during 2025.
 The preregistered ROC-AUC target was 0.80.
 
@@ -12,10 +13,10 @@ or automate lending and investment decisions.
 
 ## What changed
 
-Six model families and multiple ensemble methods were compared through nested, quarterly rolling
-validation. The experiments included logistic regression, random forest, Extra Trees, histogram
-gradient boosting, XGBoost, and an RBF support-vector challenger. Broad averaging and hard
-window-by-window model switching did not improve performance consistently.
+Five model families and multiple ensemble methods were compared through nested,
+quarterly rolling validation. The experiments included regularized logistic regression, random
+forest, histogram gradient boosting, XGBoost, and an RBF support-vector challenger. Broad averaging
+and hard window-by-window model switching did not improve performance consistently.
 
 The selected model combines:
 
@@ -29,7 +30,7 @@ features, models, blend weights, or thresholds.
 
 ## Results
 
-| Metric | Phase 3 development | Sealed late-2024 test |
+| Metric | Optimization development | Sealed late-2024 test |
 |---|---:|---:|
 | ROC-AUC | 0.760 | **0.841** |
 | PR-AUC | 0.462 | **0.494** |
@@ -61,10 +62,15 @@ not be treated as a stable population estimate.
 
 ## Outcome
 
-Phase 3 achieved its principal goal: ROC-AUC exceeded 0.80 on genuinely unseen time-period evidence.
-PR-AUC and workload also improved in the comparable development analysis, and the sealed test
-supported those gains in a later period. The result demonstrates stronger ranking performance,
-model comparison, leakage-aware ensemble construction, and disciplined out-of-time evaluation.
+The Phase 2 optimization achieved its principal goal: ROC-AUC exceeded 0.80 on genuinely unseen
+time-period evidence. PR-AUC and workload also improved in the comparable development analysis,
+and the sealed test supported those gains in a later period. The result demonstrates stronger
+ranking performance, model comparison, leakage-aware ensemble construction, and disciplined
+out-of-time evaluation.
 
 The next useful evidence is another matured future period. Additional tuning against this test would
 weaken rather than strengthen the project.
+
+The [combined Phase 1 + Phase 2 research report](Corporate_Financial_Deterioration_Combined_Phase1_Phase2_Research_Report.pdf)
+provides the full business, financial, methodological, and limitations context. Exact published
+metrics are available in the [machine-readable evidence file](../source_data/phase3_final_metrics.json).

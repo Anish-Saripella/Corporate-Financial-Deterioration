@@ -204,9 +204,12 @@ Versioned artifacts include the universe, empty replacement audit, source manife
 feature registry, label sensitivity table, temporal folds, nested selections, raw and calibrated
 OOF predictions, threshold analysis, explanations, monitoring results, and final test report.
 
-## Current scientific limitation
+## Original development-stage limitation
 
-The 2023-and-later Phase 1 holdout has already been evaluated. Phase 2 may use it in development
-backtests, but cannot call it untouched evidence. Because financial history ends in 2025, no honest
-new final test performance can yet be reported. Phase 2 remains development-only until a later
-prospective window accumulates complete four-quarter outcomes.
+This methodology was registered before the later model-optimization experiment. At that point, the
+2023-and-later Phase 1 holdout had already been evaluated and Phase 2 correctly remained
+development-only. The subsequent experiment established a separate late-2024 decision window whose
+complete four-quarter outcomes matured during 2025, froze model and threshold choices using earlier
+development evidence, and evaluated that window once. See the
+[model-optimization methodology](phase2_model_optimization_methodology.md) and final combined report
+for the resulting out-of-time evidence.
