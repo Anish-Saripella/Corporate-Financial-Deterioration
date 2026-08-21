@@ -40,4 +40,3 @@ begin with the root [project overview](../README.md) and the [published reports]
 ## Portfolio material
 
 - [Detailed project case study](case_study.md)
-- [Resume and interview summary](resume_summary.md)

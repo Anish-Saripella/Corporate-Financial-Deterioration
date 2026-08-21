@@ -17,7 +17,6 @@ recommendation.
 | Browse every published deliverable | [Published reports index](reports/publication/README.md) |
 | Understand the system design | [Architecture](docs/architecture.md) and [modeling lineage](docs/modeling_lineage.md) |
 | Reproduce the analysis | [Phase 1 guide](docs/reproducibility.md) and [Phase 2 guide](docs/phase2_reproducibility.md) |
-| Prepare for an interview | [Resume and interview summary](docs/resume_summary.md) |
 
 ## What the project demonstrates
 
