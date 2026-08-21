@@ -10,7 +10,8 @@ without requiring raw SEC/FRED downloads or a separate reporting application.
 | `phase1_company_watchlist.parquet` | Latest evaluated company-level predictions and financial context |
 | `phase1_model_performance.parquet` | Development and locked-holdout model metrics |
 | `phase1_company_history.parquet` | Certified company-quarter KPI and prediction history |
+| `phase3_final_metrics.json` | Frozen Phase 3 development and sealed-test metrics with uncertainty intervals |
 
 The tables contain derived public-data research evidence only. They contain no credentials,
-proprietary data, or synthetic observations. Generated Phase 2 analytical files remain ignored
+proprietary data, or synthetic observations. Generated Phase 2 and Phase 3 analytical files remain ignored
 because they can be reconstructed from the certified local pipeline.

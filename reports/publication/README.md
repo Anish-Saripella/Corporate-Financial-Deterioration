@@ -1,17 +1,24 @@
 # Published reports
 
-This folder contains the completed Phase 1 and Phase 2 publications. For the clearest overview,
-start with the combined report; the individual reports preserve phase-specific detail.
+This folder contains the completed Phase 1, Phase 2, and Phase 3 publications. For the clearest overview,
+start with the Phase 3 results for the latest model evidence, then use the combined Phase 1 + Phase 2
+report for the full research foundation.
 
 ## Recommended reading order
 
-1. **[Combined Phase 1 + Phase 2 research report (PDF)](Corporate_Financial_Deterioration_Combined_Phase1_Phase2_Research_Report.pdf)**  
+1. **[Phase 3 model accuracy and ensemble results](Phase3_Model_Accuracy_and_Ensemble_Results.md)**
+
+   The latest model comparison, workload evidence, and sealed out-of-time test.
+2. **[Combined Phase 1 + Phase 2 research report (PDF)](Corporate_Financial_Deterioration_Combined_Phase1_Phase2_Research_Report.pdf)**
+
    The primary, integrated account of the business question, data, methodology, results,
    limitations, and conclusions.
-2. **[Phase 2 portfolio case study (PDF)](Corporate_Financial_Deterioration_Phase2_Portfolio_Case_Study.pdf)**  
+3. **[Phase 2 portfolio case study (PDF)](Corporate_Financial_Deterioration_Phase2_Portfolio_Case_Study.pdf)**
+
    A shorter recruiter-facing summary of the problem, implementation, evidence, and practical
    interpretation.
-3. Phase-specific research reports  
+4. Phase-specific research reports
+
    Detailed records of the benchmark and expanded development study.
 
 ## Complete publication library

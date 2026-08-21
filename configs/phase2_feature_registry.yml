@@ -59,8 +59,9 @@ missing_data_policy:
   future_label_window: must_contain_four_consecutive_fiscal_quarters
 
 data_quality_only_fields:
-  - filing_delay_days
-  - preferred_tag_share
-  - derived_fact_share
-  - source_quality_score
+  fields:
+    - filing_delay_days
+    - preferred_tag_share
+    - derived_fact_share
+    - source_quality_score
   caveat: never_describe_reporting_delay_as_direct_evidence_of_deterioration

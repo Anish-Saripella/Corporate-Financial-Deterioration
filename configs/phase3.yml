@@ -1,0 +1,71 @@
+version: phase3-model-accuracy-v1
+status: development
+random_seed: 20260802
+
+validation:
+  development_end: 2024-06-30
+  sealed_test_start: 2024-07-01
+  sealed_test_end: 2024-12-31
+  first_validation_origin: 2020-01-01
+  validation_window_quarters: 4
+  step_quarters: 1
+  minimum_training_quarters: 24
+  label_embargo_quarters: 4
+
+metrics:
+  primary: ROC_AUC
+  sealed_test_target: 0.80
+  phase2_roc_auc_benchmark: 0.716
+  phase2_pr_auc_benchmark: 0.412
+  minimum_sector_recall: 0.80
+  phase2_alert_rate_at_target_recall: 0.5763
+  target_alert_rate: 0.50
+  phase2_precision_at_target_recall: 0.2976
+  target_precision: 0.34
+
+features:
+  maximum_missing_rate: 0.60
+  maximum_absolute_correlation: 0.92
+  minimum_features: 8
+  maximum_features: 18
+  protected: [interest_coverage_ttm]
+  categorical: [sector, industry, size_tier]
+  additional_candidates: []
+
+models:
+  logistic_l2:
+    - {C: 0.10, positive_weight: 1.0}
+    - {C: 0.50, positive_weight: 1.0}
+    - {C: 0.50, positive_weight: 2.0}
+  logistic_elastic_net:
+    - {C: 0.10, l1_ratio: 0.25, positive_weight: 1.0}
+    - {C: 0.50, l1_ratio: 0.25, positive_weight: 1.0}
+    - {C: 0.50, l1_ratio: 0.50, positive_weight: 2.0}
+  random_forest:
+    - {n_estimators: 350, max_depth: 5, min_samples_leaf: 20, max_features: sqrt}
+    - {n_estimators: 500, max_depth: 7, min_samples_leaf: 15, max_features: 0.7}
+  extra_trees:
+    - {n_estimators: 350, max_depth: 6, min_samples_leaf: 15, max_features: sqrt}
+    - {n_estimators: 500, max_depth: 8, min_samples_leaf: 10, max_features: 0.7}
+  histogram_gradient_boosting:
+    - {max_iter: 200, learning_rate: 0.05, max_leaf_nodes: 15, min_samples_leaf: 25, l2_regularization: 1.0}
+    - {max_iter: 300, learning_rate: 0.03, max_leaf_nodes: 15, min_samples_leaf: 20, l2_regularization: 2.0}
+  xgboost:
+    - {n_estimators: 250, max_depth: 2, learning_rate: 0.04, min_child_weight: 8, subsample: 0.8, colsample_bytree: 0.8, reg_alpha: 0.0, reg_lambda: 2.0}
+    - {n_estimators: 400, max_depth: 2, learning_rate: 0.025, min_child_weight: 10, subsample: 0.8, colsample_bytree: 0.8, reg_alpha: 0.2, reg_lambda: 3.0}
+    - {n_estimators: 300, max_depth: 3, learning_rate: 0.03, min_child_weight: 12, subsample: 0.8, colsample_bytree: 0.7, reg_alpha: 0.2, reg_lambda: 3.0}
+  rbf_svc:
+    - {C: 0.25, gamma: scale}
+    - {C: 0.50, gamma: scale}
+    - {C: 1.00, gamma: scale}
+  sector_specific_families: [xgboost, random_forest]
+
+ensembles:
+  candidates: [simple_average, rank_average, top3_average, inner_winner, xgb_sector_blend, xgb_rf_blend, static_weighted, adaptive_weighted, stacking]
+  static_equal_weight_shrinkage: 0.50
+  adaptive_equal_weight_shrinkage: 0.50
+  adaptive_decay: 0.80
+  minimum_adaptive_roc_gain: 0.01
+  maximum_sector_roc_decline: 0.02
+  maximum_period_roc_decline: 0.03
+  xgb_sector_specific_weight: 0.40

@@ -356,7 +356,7 @@ rating, causal conclusion, or trading recommendation.
 - Delisted firms are excluded, so survivorship bias limits generalization.
 - Former strict Phase 1 certification: {strict_count} issuers; {flagged_count} retained with visible
   quality flags and company-quarter modeling eligibility.
-- Sampling uses seed 20260802, industry/size strata, no replacement, and frozen same-sector
+- Sampling uses seed 42, industry/size strata, no replacement, and frozen same-sector
   reserves.
 
 ## Development model

@@ -23,6 +23,8 @@ def validate_configuration() -> dict[str, object]:
         "plot_style.yml",
         "modeling.yml",
         "phase2.yml",
+        "phase3.yml",
+        "phase3_reporting.yml",
     ]:
         read_yaml(root / "configs" / filename)
     paths = ensure_local_directories(config)
@@ -125,6 +127,18 @@ def main() -> None:
         "run-phase2-horizon-sensitivity",
         help="Compare two- and four-quarter deterioration horizons on paired temporal folds",
     )
+    subparsers.add_parser(
+        "run-phase3-development",
+        help="Compare Phase 3 models and ensembles on rolling out-of-fold windows",
+    )
+    subparsers.add_parser(
+        "evaluate-phase3-final-test",
+        help="Evaluate the frozen Phase 3 champion on the sealed late-2024 cohort once",
+    )
+    subparsers.add_parser(
+        "build-phase3-evidence",
+        help="Build uncertainty intervals and the Phase 3 evidence summary",
+    )
     arguments = parser.parse_args()
 
     if arguments.command == "validate-config":
@@ -212,6 +226,18 @@ def main() -> None:
         from cfd.stage28 import run_stage_28
 
         print(json.dumps(run_stage_28(), indent=2, default=str))
+    elif arguments.command == "run-phase3-development":
+        from cfd.stage29 import run_stage_29
+
+        print(json.dumps(run_stage_29(), indent=2, default=str))
+    elif arguments.command == "evaluate-phase3-final-test":
+        from cfd.stage30 import run_stage_30
+
+        print(json.dumps(run_stage_30(), indent=2, default=str))
+    elif arguments.command == "build-phase3-evidence":
+        from cfd.stage31 import run_stage_31
+
+        print(json.dumps(run_stage_31(), indent=2, default=str))
 
 
 if __name__ == "__main__":
